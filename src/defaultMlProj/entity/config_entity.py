@@ -7,7 +7,7 @@ from typing import Dict
 class DataIngestionConfig:
     """
     Config for data ingestion.
-    Since we're using a local file, no source_url or unzip_dir needed.
+    Since we're using a local file.
     """
     root_dir: Path
     source_data_file: Path  # Local path to your CSV (notebook/data/default.csv)
