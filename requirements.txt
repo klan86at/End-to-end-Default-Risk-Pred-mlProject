@@ -1,0 +1,18 @@
+# requirements.txt
+pandas
+numpy
+scikit-learn
+seaborn
+statsmodels
+mlflow
+notebook
+matplotlib
+pyYAML
+python-box
+tqdm
+ensure
+joblib
+types-pyyaml
+fastapi
+uvicorn
+-e .

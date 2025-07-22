@@ -46,9 +46,18 @@ list_of_files = [
     f"src/{project_name}/constants/__init__.py",
     f"src/{project_name}/constants/constant.py",
 
+    # Exceptions
+    f"src/{project_name}/exception/exception.py",
+
+    # API
+    f"src/{project_name}/api/__init__.py",
+    f"src/{project_name}/api/main.py",
+    f"src/{project_name}/api/routes/prediction.py",
+
     # Config files (YAML)
-    "config/config.yaml",
-    "params.yaml",
+    Path("config") / "config.yaml",
+    Path("config") / "params.yaml",
+    Path("config") / "schema.yaml",
 
     # Entry points
     "main.py",
@@ -60,6 +69,10 @@ list_of_files = [
 
     # Research
     "notebook/trials.ipynb",
+
+    # Tests
+    f"tests/__init__.py",
+    f"tests/test_data_ingestion.py",
 
     # Web templates (for Flask/Dash)
     "templates/index.html",
