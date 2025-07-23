@@ -15,4 +15,6 @@ joblib
 types-pyyaml
 fastapi
 uvicorn
+plotly
+xgboost
 -e .
