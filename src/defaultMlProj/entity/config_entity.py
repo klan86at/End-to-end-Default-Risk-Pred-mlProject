@@ -30,11 +30,10 @@ class DataValidationConfig:
 @dataclass(frozen=True)
 class DataTransformationConfig:
     """
-    Config for transforming data (e.g., train/test split, scaling, encoding).
+    Config for transforming data (train/test split, filling missing values, encoding).
     """
     root_dir: Path
-    data_path: Path           # Input: validated data
-    # Optional: Add transformer_name, scaling_method,  if needed later
+    data_path: Path
 
 
 @dataclass(frozen=True)
