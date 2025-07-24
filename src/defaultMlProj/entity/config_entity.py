@@ -38,15 +38,12 @@ class DataTransformationConfig:
 
 @dataclass(frozen=True)
 class ModelTrainerConfig:
-    """
-    Config for training the model.
+    """ Config for training the model.
     """
     root_dir: Path
     train_data_path: Path
     test_data_path: Path
-    model_name: str           # "model.joblib"
-    target_column: str        # Name of the target variable
-
+    model_name: str
 
 
 @dataclass(frozen=True)
