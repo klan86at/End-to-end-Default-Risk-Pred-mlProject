@@ -48,13 +48,11 @@ class ModelTrainerConfig:
 
 @dataclass(frozen=True)
 class ModelEvaluationConfig:
-    """
-    Config for evaluating the model.
+    """ Config for evaluating the model.
     """
     root_dir: Path
     test_data_path: Path
     model_path: Path
-    metric_file_name: Path    # artifacts/model_evaluation/metrics.json
-    all_params: Dict          # Model parameters (from params.yaml)
-    target_column: str
-    mlflow_uri: str           # e.g "https://mlflow.example.com " or "mlruns"
+    metric_file_name: str
+    mlflow_uri: str
+    experiment_name: str 

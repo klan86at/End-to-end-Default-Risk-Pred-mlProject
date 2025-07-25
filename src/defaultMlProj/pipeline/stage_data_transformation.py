@@ -17,3 +17,15 @@ class DataTransformationPipeline:
             data_transformation.train_test_split()
         except Exception as e:
             raise e
+
+
+if __name__ == "__main__":
+    try:
+        logger.info(f"{'>'*10} Stage: {STAGE_NAME} started {'<'*10}")
+        data_transformation_pipeline = DataTransformationPipeline()
+        data_transformation_pipeline.main()
+        logger.info(f"{'>'*10}> Stage: {STAGE_NAME} completed {'<'*10}\n\n{'X'*20}")
+    except Exception as e:
+        logger.exception(e)
+        raise e
+    
