@@ -27,3 +27,6 @@ model_evaluation:
   metric_file_name: artifacts/model_evaluation/metrics.json
   mlflow_uri: https://dagshub.com/klan86at/Default-risk-prediction.mlflow
   experiment_name: DefaultRiskPrediction
+
+model_serving:
+  model_path: artifacts/model_trainer/model.joblib

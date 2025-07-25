@@ -1,6 +1,12 @@
 from defaultMlProj.constants.constant import *
 from defaultMlProj.utils.common import read_yaml, create_directories
-from defaultMlProj.entity.config_entity import (DataIngestionConfig, DataTransformationConfig, ModelTrainerConfig, ModelEvaluationConfig)
+from defaultMlProj.entity.config_entity import (
+    DataIngestionConfig,
+    DataTransformationConfig,
+    ModelTrainerConfig,
+    ModelEvaluationConfig,
+    ModelServingConfig
+)
 
 class ConfigurationManager:
     def __init__(
@@ -80,3 +86,15 @@ class ConfigurationManager:
         Returns the parameters loaded from params.yaml
         """
         return self.params
+    
+
+    def get_model_serving_config(self) -> ModelServingConfig:
+        config = self.config.model_serving
+
+        create_directories([config.root_dir])
+
+        model_serving_config = ModelServingConfig(
+            model_path=config.model_path
+        )
+
+        return model_serving_config

@@ -56,3 +56,10 @@ class ModelEvaluationConfig:
     metric_file_name: str
     mlflow_uri: str
     experiment_name: str 
+
+
+@dataclass(frozen=True)
+class ModelServingConfig:
+    """ Config for serving the model.
+    """
+    model_path: Path

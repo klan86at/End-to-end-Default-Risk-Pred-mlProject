@@ -120,3 +120,19 @@ def get_size(path: Union[str, Path]) -> str:
     """
     Size_in_KB = round(os.path.getsize(path) / 1024)
     return f"~ {Size_in_KB} KB"
+
+
+@ensure_annotations
+def load_model(model_path: Union[str, Path]):
+    """ Loads a machine learning model from a specified path.
+    Args:
+        model_path (Union[str, Path]): Path to the model file.
+    Returns:
+        Any: The loaded model.
+    Raises:
+        FileNotFoundError: If the model file does not exist at the specified path.
+    """
+    model_path = Path(model_path)
+    if not model_path.exists():
+        raise FileNotFoundError(f"Model not found at {model_path}")
+    return joblib.load(model_path)
