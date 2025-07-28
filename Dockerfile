@@ -21,6 +21,6 @@ ENV PYTHONPATH=/app/src
 # Expose port
 EXPOSE 8000
 
-#Run FastAPI with uvicorn
-CMD ["uvicorn", "--app-dir=/app", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run FastAPI with uvicorn
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "$PORT"]
 
