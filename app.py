@@ -64,14 +64,14 @@ if file:
         st.error("CSV missing required columns")
         st.stop()
 
-    if st.button("Predict all"):
-        payload = df[cols].to_dict(orient="records")
+    if st.button("🚀 Predict all"):
+        payload = {"instances": df[cols].to_dict(orient="records")}
         r = requests.post("https://default-risk-api.onrender.com/predict/batch",
                           json=payload, timeout=60)
         if r.ok:
             preds = pd.DataFrame(r.json()["predictions"])
             out = pd.concat([df, preds], axis=1)
             st.dataframe(out)
-            st.download_button("Download CSV", out.to_csv(index=False), "batch.csv")
+            st.download_button("📥 Download CSV", out.to_csv(index=False), "batch.csv")
         else:
-            st.error(f"API error {r.status_code}: {r.text}")
+            st.error(f"{r.status_code} – {r.text}")
