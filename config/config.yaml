@@ -29,4 +29,5 @@ model_evaluation:
   experiment_name: DefaultRiskPrediction
 
 model_serving:
+  root_dir: artifacts/model_serving
   model_path: artifacts/model_trainer/model.joblib

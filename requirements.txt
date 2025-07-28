@@ -17,4 +17,4 @@ fastapi
 uvicorn
 plotly
 xgboost
--e .
+# -e .

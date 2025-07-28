@@ -62,4 +62,5 @@ class ModelEvaluationConfig:
 class ModelServingConfig:
     """ Config for serving the model.
     """
+    root_dir: Path
     model_path: Path

@@ -94,6 +94,7 @@ class ConfigurationManager:
         create_directories([config.root_dir])
 
         model_serving_config = ModelServingConfig(
+            root_dir=config.root_dir,
             model_path=config.model_path
         )
 
