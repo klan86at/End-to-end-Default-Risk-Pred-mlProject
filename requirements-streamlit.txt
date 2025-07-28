@@ -1,3 +1,4 @@
 # requirements-streamlit.txt
 streamlit
 requests
+pandas
