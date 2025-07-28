@@ -63,6 +63,9 @@ list_of_files = [
     "main.py",
     "app.py",
 
+    # Api
+    "api/main.py"
+
     # Packaging and deployment
     "requirements.txt",
     "setup.py",
