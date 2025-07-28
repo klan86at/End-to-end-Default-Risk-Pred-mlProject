@@ -107,43 +107,32 @@ with st.expander("Batch Prediction (CSV Upload)"):
                 st.stop()
             
             if st.button("Predict all"):
-                with st.spinner(f"Processing {len(df)} records..."):
-                    # 5. Parallel Batch Processing
-                    with ThreadPoolExecutor(max_workers=4) as executor:
-                        batches = [
-                            batch.to_dict('records') 
-                            for _, batch in df.groupby(np.arange(len(df)) // 50)
-                        ]
-                        
-                        results = list(executor.map(
-                            lambda b: requests.post(API_BATCH, json=b, timeout=60).json(),
-                            batches
-                        ))
+                with st.spinner("Processing..."):
+                    # 1. Prepare payload
+                    payload = df[required_cols].to_dict(orient='records')
                     
-                    # 6. Combine Results
-                    out = df.copy()
-                    out[["risk_score", "risk_level"]] = pd.concat(
-                        [pd.DataFrame(r) for r in results]
-                    )
+                    # 2. Debug output - show first 2 records
+                    st.write("### Payload Sample (First 2 Records)")
+                    st.json(payload[:2])  # Slice to show only first 2
                     
-                    st.success(f"Processed {len(out)} records")
-                    st.dataframe(out)
-                    
-                    # 7. Enhanced Export
-                    csv = out.to_csv(index=False)
-                    st.download_button(
-                        "📥 Download Full Results", 
-                        csv,
-                        "predictions.csv",
-                        help="Contains original data + predictions"
-                    )
+                    # 3. Process in batches
+                    results = []
+                    for i in range(0, len(payload), 100):
+                        batch = payload[i:i+100]
+                        try:
+                            r = requests.post(API_BATCH, json=batch, timeout=60)
+                            if r.status_code == 200:
+                                results.extend(r.json())
+                            else:
+                                st.error(f"Batch failed: {r.status_code}")
+                                st.json(batch[0])  # Show failing record
+                                st.code(r.text)    # Show API response
+                        except Exception as e:
+                            st.error(f"Error: {str(e)}")
+                            st.json(batch[0])      # Show problematic record
+                            break
         except Exception as e:
-            st.error(f"Batch processing failed: {str(e)}")
-            st.stop()
-
-        except Exception as e:
-            st.error(f"Batch processing failed: {str(e)}")
-            st.stop()
+            st.error(f"Error processing file: {str(e)}")
 
 # Add API documentation link
 st.markdown("""
