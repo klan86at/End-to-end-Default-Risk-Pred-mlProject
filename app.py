@@ -1,16 +1,16 @@
-# 1. Single customer prediction
 # app.py
-
 import streamlit as st
 import requests
 import pandas as pd
+import time
 
 # Title
 st.title("Loan Default Risk Prediction")
 
-# Input form
-st.header("Enter Customer Details")
+# --- 1. Single Customer Prediction ---
+st.header("👤 Single Customer Prediction")
 
+# Input form
 credit_score = st.slider("Credit Score", 300, 850, 700)
 income = st.number_input("Annual Income ($)", min_value=0, value=50000)
 loan_amount = st.number_input("Loan Amount ($)", min_value=1000, value=10000)
@@ -21,10 +21,16 @@ employment_years = st.slider("Employment Years", 0, 50, 5)
 savings = st.number_input("Savings Balance ($)", min_value=0, value=10000)
 age = st.slider("Age", 18, 100, 35)
 
-# Predict button
-if st.button("Predict Risk"):
-    # Call your FastAPI
-    api_url = "https://default-risk-api.onrender.com/predict"  # ← Use your Render URL
+# Buttons
+col1, col2 = st.columns(2)
+with col1:
+    predict_btn = st.button("Predict Risk")
+with col2:
+    if st.button("Clear Inputs"):
+        st.rerun()
+
+if predict_btn:
+    api_url = "https://default-risk-api.onrender.com/predict"
 
     data = {
         "credit_score": credit_score,
@@ -39,93 +45,148 @@ if st.button("Predict Risk"):
     }
 
     try:
-        response = requests.post(api_url, json=data)
+        # Add timeout to avoid hanging
+        response = requests.post(api_url, json=data, timeout=30)
+        
         if response.status_code == 200:
-            result = response.json()
-            risk_score = result["predicted_default_risk_score"]
-            risk_level = result["risk_level"]
+            try:
+                result = response.json()
+                risk_score = result["predicted_default_risk_score"]
+                risk_level = result["risk_level"]
 
-            st.success(f"Predicted Risk Score: {risk_score:.4f}")
-            st.markdown(f"### Risk Level: `{risk_level}`")
+                st.success(f"Predicted Risk Score: {risk_score:.4f}")
+                st.markdown(f"### Risk Level: `{risk_level}`")
+
+                # Download single result
+                single_df = pd.DataFrame([data])
+                single_df["predicted_default_risk_score"] = risk_score
+                single_df["risk_level"] = risk_level
+                csv = single_df.to_csv(index=False).encode("utf-8")
+                st.download_button(
+                    "📥 Download This Prediction",
+                    data=csv,
+                    file_name="single_prediction.csv",
+                    mime="text/csv"
+                )
+            except ValueError:
+                st.error("Invalid JSON response from API")
         else:
-            st.error("Prediction failed")
+            st.error(f"API Error: {response.status_code}")
+            st.code(response.text)
+    except requests.exceptions.Timeout:
+        st.error("Request timed out. The API might be slow to wake up.")
+    except requests.exceptions.ConnectionError:
+        st.error("Failed to connect to API. Check if the backend is live.")
     except Exception as e:
-        st.error(f"Connection error: {e}")
+        st.error(f"Unexpected error: {e}")
 
 
-# 2. --- Batch Prediction Section ---
-
-with open("sample_input.csv", "w") as f:
-    f.write("credit_score,income,loan_amount,loan_term,interest_rate,debt_to_income_ratio,employment_years,savings_balance,age\n")
-    f.write("750,50000,10000,36,5.5,0.3,5,10000,35\n")
-    f.write("700,60000,15000,60,6.0,0.4,3,5000,40")
-
-with open("sample_input.csv", "r") as f:
-    st.download_button("🔽 Download Sample CSV Template", f, "sample_input.csv")
+# --- 2. Batch Prediction ---
 
 st.header("Batch Prediction (Upload CSV)")
+
+# Sample CSV template
+sample_data = """credit_score,income,loan_amount,loan_term,interest_rate,debt_to_income_ratio,employment_years,savings_balance,age
+750,50000,10000,36,5.5,0.3,5,10000,35
+700,60000,15000,60,6.0,0.4,3,5000,40"""
+
+st.download_button(
+    "🔽 Download Sample CSV Template",
+    data=sample_data,
+    file_name="sample_input.csv",
+    mime="text/csv"
+)
 
 uploaded_file = st.file_uploader("Upload a CSV file with customer data", type="csv")
 
 if uploaded_file is not None:
-    # Read data
-    batch_df = pd.read_csv(uploaded_file)
-    st.write("### Uploaded Data Preview")
-    st.dataframe(batch_df.head())
+    try:
+        batch_df = pd.read_csv(uploaded_file)
+        st.write("### Uploaded Data Preview")
+        st.dataframe(batch_df.head())
 
-    if st.button("Predict for All Customers"):
-        # Validate required columns
+        # Clear upload button
+        if st.button("🗑️ Clear Upload"):
+            st.rerun()
+
         required_columns = [
             "credit_score", "income", "loan_amount", "loan_term",
             "interest_rate", "debt_to_income_ratio", "employment_years",
             "savings_balance", "age"
         ]
 
-        if not all(col in batch_df.columns for col in required_columns):
-            st.error(f"CSV must contain all required columns: {required_columns}")
+        missing_cols = set(required_columns) - set(batch_df.columns)
+        if missing_cols:
+            st.error(f"Missing required columns: {missing_cols}")
         else:
-            with st.spinner("Predicting..."):
-                predictions = []
-                api_url = "https://default-risk-api.onrender.com/predict/batch"
+            if st.button("Predict for All Customers"):
+                with st.spinner("Processing batch predictions..."):
+                    predictions = []
+                    api_url = "https://default-risk-api.onrender.com/predict/batch"  # ✅ No trailing space
 
-                for _, row in batch_df.iterrows():
-                    data = row[required_columns].to_dict()
-                    try:
-                        response = requests.post(api_url, json=data)
-                        if response.status_code == 200:
-                            pred = response.json()
-                            predictions.append({
-                                "predicted_default_risk_score": pred["predicted_default_risk_score"],
-                                "risk_level": pred["risk_level"]
-                            })
-                        else:
+                    for idx, row in batch_df.iterrows():
+                        data = row[required_columns].to_dict()
+                        try:
+                            response = requests.post(api_url, json=data, timeout=30)
+                            if response.status_code == 200:
+                                pred = response.json()
+                                predictions.append({
+                                    "predicted_default_risk_score": pred["predicted_default_risk_score"],
+                                    "risk_level": pred["risk_level"]
+                                })
+                            else:
+                                predictions.append({
+                                    "predicted_default_risk_score": None,
+                                    "risk_level": f"API Error {response.status_code}"
+                                })
+                        except requests.exceptions.Timeout:
                             predictions.append({
                                 "predicted_default_risk_score": None,
-                                "risk_level": "Error"
+                                "risk_level": "Timeout"
                             })
-                    except:
-                        predictions.append({
-                            "predicted_default_risk_score": None,
-                            "risk_level": "Connection Error"
-                        })
+                        except Exception as e:
+                            predictions.append({
+                                "predicted_default_risk_score": None,
+                                "risk_level": f"Error: {str(e)}"
+                            })
 
-                # Add predictions to DataFrame
-                result_df = batch_df.copy()
-                pred_df = pd.DataFrame(predictions)
-                result_df = pd.concat([result_df, pred_df], axis=1)
+                    # Add predictions
+                    result_df = batch_df.copy()
+                    pred_df = pd.DataFrame(predictions)
+                    result_df = pd.concat([result_df, pred_df], axis=1)
 
-                st.write("### Batch Predictions")
-                st.dataframe(result_df)
+                    st.write("### Batch Predictions")
+                    st.dataframe(result_df)
 
-                # Add download button
-                @st.cache_data
-                def convert_df(df):
-                    return df.to_csv(index=False).encode('utf-8')
+                    # Download options
+                    @st.cache_data
+                    def convert_df(df):
+                        return df.to_csv(index=False).encode("utf-8")
 
-                csv = convert_df(result_df)
-                st.download_button(
-                    label="Download Predictions as CSV",
-                    data=csv,
-                    file_name="predicted_risk_scores.csv",
-                    mime="text/csv"
-                )
+                    csv = convert_df(result_df)
+                    json_data = result_df.to_json(orient="records")
+
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.download_button(
+                            "📥 Download as CSV",
+                            data=csv,
+                            file_name="predictions.csv",
+                            mime="text/csv"
+                        )
+                    with col2:
+                        st.download_button(
+                            "📤 Download as JSON",
+                            data=json_data,
+                            file_name="predictions.json",
+                            mime="application/json"
+                        )
+
+                    # Summary chart
+                    if "risk_level" in result_df.columns:
+                        st.write("### Prediction Summary")
+                        risk_counts = result_df["risk_level"].value_counts()
+                        st.bar_chart(risk_counts)
+
+    except Exception as e:
+        st.error(f"Error reading CSV: {str(e)}")
