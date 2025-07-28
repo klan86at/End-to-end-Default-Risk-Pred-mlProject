@@ -4,8 +4,6 @@ import pandas as pd
 from pydantic import BaseModel, Field, conint, confloat
 from typing import Optional
 import json
-from concurrent.futures import ThreadPoolExecutor
-import numpy as np
 
 # --- FastAPI Model Definition (Mirror exactly what your backend expects) ---
 class LoanInput(BaseModel):
@@ -78,61 +76,65 @@ with st.expander("Batch Prediction (CSV Upload)"):
     sample = """credit_score,income,loan_amount,loan_term,interest_rate,debt_to_income_ratio,employment_years,savings_balance,age
 750,50000,10000,36,5.5,0.3,5,10000,35
 700,60000,15000,60,6.0,0.4,3,5000,40"""
+    
+    st.download_button("Download sample CSV", sample, "sample.csv")
 
     file = st.file_uploader("Upload CSV", type=["csv"])
-
     if file:
         try:
             df = pd.read_csv(file)
             st.dataframe(df.head())
             
-            # 1. Column Alignment
-            df = df.rename(columns={"debt_to_income_ratio": "debt-to-income-ratio"})
+            # Convert columns to match API spec
+            df = df.rename(columns={
+                "debt_to_income_ratio": "debt-to-income-ratio"  # Handle alias
+            })
             
-            # 2. Schema Validation
-            required_cols = list(LoanInput.model_json_schema()["properties"].keys())
-            if missing := set(required_cols) - set(df.columns):
+            # Validate columns
+            required_cols = list(LoanInput.schema()["properties"].keys())
+            missing = set(required_cols) - set(df.columns)
+            if missing:
                 st.error(f"Missing columns: {missing}")
                 st.stop()
                 
-            # 3. Type Conversion
+            # Type conversion
             for col in required_cols:
-                if pd.api.types.is_numeric_dtype(df[col]):
-                    df[col] = pd.to_numeric(df[col], errors='coerce')
-            
-            # 4. Data Quality Check
-            if df[required_cols].isna().any().any():
-                st.error("Invalid values detected:")
-                st.dataframe(df[df.isna().any(axis=1)])
-                st.stop()
+                if col in df.columns:
+                    dtype = LoanInput.__annotations__.get(col)
+                    if dtype in (int, float):
+                        df[col] = pd.to_numeric(df[col], errors='coerce')
             
             if st.button("Predict all"):
-                with st.spinner("Processing..."):
-                    # 1. Prepare payload
+                with st.spinner("Validating and processing..."):
+                    # Convert to API-ready format
                     payload = df[required_cols].to_dict(orient='records')
                     
-                    # 2. Debug output - show first 2 records
-                    st.write("### Payload Sample (First 2 Records)")
-                    st.json(payload[:2])  # Slice to show only first 2
+                    # Debug preview
+                    st.write("First record being sent:")
+                    st.json(payload[0])
                     
-                    # 3. Process in batches
-                    results = []
-                    for i in range(0, len(payload), 100):
-                        batch = payload[i:i+100]
+                    # Send with proper headers
+                    headers = {"Content-Type": "application/json"}
+                    r = requests.post(API_BATCH, json=payload, headers=headers, timeout=60)
+                    
+                    if r.ok:
+                        preds = pd.DataFrame(r.json())
+                        out = pd.concat([df, preds], axis=1)
+                        st.success("✅ Predictions complete!")
+                        st.dataframe(out)
+                        
+                        csv = out.to_csv(index=False)
+                        st.download_button("📥 Download CSV", csv, "batch_predictions.csv")
+                    else:
+                        st.error(f"{r.status_code} Error")
                         try:
-                            r = requests.post(API_BATCH, json=batch, timeout=60)
-                            if r.status_code == 200:
-                                results.extend(r.json())
-                            else:
-                                st.error(f"Batch failed: {r.status_code}")
-                                st.json(batch[0])  # Show failing record
-                                st.code(r.text)    # Show API response
-                        except Exception as e:
-                            st.error(f"Error: {str(e)}")
-                            st.json(batch[0])      # Show problematic record
-                            break
+                            st.json(r.json())  # Show structured error
+                        except:
+                            st.code(r.text)  # Fallback to raw response
+                            
         except Exception as e:
-            st.error(f"Error processing file: {str(e)}")
+            st.error(f"Processing error: {str(e)}")
+            st.stop()
 
 # Add API documentation link
 st.markdown("""
