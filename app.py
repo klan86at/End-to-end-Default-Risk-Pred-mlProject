@@ -4,6 +4,8 @@ import pandas as pd
 from pydantic import BaseModel, Field, conint, confloat
 from typing import Optional
 import json
+from concurrent.futures import ThreadPoolExecutor
+import numpy as np
 
 # --- FastAPI Model Definition (Mirror exactly what your backend expects) ---
 class LoanInput(BaseModel):
@@ -76,64 +78,71 @@ with st.expander("Batch Prediction (CSV Upload)"):
     sample = """credit_score,income,loan_amount,loan_term,interest_rate,debt_to_income_ratio,employment_years,savings_balance,age
 750,50000,10000,36,5.5,0.3,5,10000,35
 700,60000,15000,60,6.0,0.4,3,5000,40"""
-    
-    st.download_button("Download sample CSV", sample, "sample.csv")
 
     file = st.file_uploader("Upload CSV", type=["csv"])
+
     if file:
         try:
             df = pd.read_csv(file)
             st.dataframe(df.head())
             
-            # Convert columns to match API spec
-            df = df.rename(columns={
-                "debt_to_income_ratio": "debt-to-income-ratio"  # Handle alias
-            })
+            # 1. Column Alignment
+            df = df.rename(columns={"debt_to_income_ratio": "debt-to-income-ratio"})
             
-            # Validate columns
-            required_cols = list(LoanInput.schema()["properties"].keys())
-            missing = set(required_cols) - set(df.columns)
-            if missing:
+            # 2. Schema Validation
+            required_cols = list(LoanInput.model_json_schema()["properties"].keys())
+            if missing := set(required_cols) - set(df.columns):
                 st.error(f"Missing columns: {missing}")
                 st.stop()
                 
-            # Type conversion
+            # 3. Type Conversion
             for col in required_cols:
-                if col in df.columns:
-                    dtype = LoanInput.__annotations__.get(col)
-                    if dtype in (int, float):
-                        df[col] = pd.to_numeric(df[col], errors='coerce')
+                if pd.api.types.is_numeric_dtype(df[col]):
+                    df[col] = pd.to_numeric(df[col], errors='coerce')
+            
+            # 4. Data Quality Check
+            if df[required_cols].isna().any().any():
+                st.error("Invalid values detected:")
+                st.dataframe(df[df.isna().any(axis=1)])
+                st.stop()
             
             if st.button("Predict all"):
-                with st.spinner("Validating and processing..."):
-                    # Convert to API-ready format
-                    payload = df[required_cols].to_dict(orient='records')
-                    
-                    # Debug preview
-                    st.write("First record being sent:")
-                    st.json(payload[0])
-                    
-                    # Send with proper headers
-                    headers = {"Content-Type": "application/json"}
-                    r = requests.post(API_BATCH, json=payload, headers=headers, timeout=60)
-                    
-                    if r.ok:
-                        preds = pd.DataFrame(r.json())
-                        out = pd.concat([df, preds], axis=1)
-                        st.success("✅ Predictions complete!")
-                        st.dataframe(out)
+                with st.spinner(f"Processing {len(df)} records..."):
+                    # 5. Parallel Batch Processing
+                    with ThreadPoolExecutor(max_workers=4) as executor:
+                        batches = [
+                            batch.to_dict('records') 
+                            for _, batch in df.groupby(np.arange(len(df)) // 50)
+                        ]
                         
-                        csv = out.to_csv(index=False)
-                        st.download_button("📥 Download CSV", csv, "batch_predictions.csv")
-                    else:
-                        st.error(f"{r.status_code} Error")
-                        try:
-                            st.json(r.json())  # Show structured error
-                        except:
-                            st.code(r.text)  # Fallback to raw response
-                            
+                        results = list(executor.map(
+                            lambda b: requests.post(API_BATCH, json=b, timeout=60).json(),
+                            batches
+                        ))
+                    
+                    # 6. Combine Results
+                    out = df.copy()
+                    out[["risk_score", "risk_level"]] = pd.concat(
+                        [pd.DataFrame(r) for r in results]
+                    )
+                    
+                    st.success(f"Processed {len(out)} records")
+                    st.dataframe(out)
+                    
+                    # 7. Enhanced Export
+                    csv = out.to_csv(index=False)
+                    st.download_button(
+                        "📥 Download Full Results", 
+                        csv,
+                        "predictions.csv",
+                        help="Contains original data + predictions"
+                    )
         except Exception as e:
-            st.error(f"Processing error: {str(e)}")
+            st.error(f"Batch processing failed: {str(e)}")
+            st.stop()
+
+        except Exception as e:
+            st.error(f"Batch processing failed: {str(e)}")
             st.stop()
 
 # Add API documentation link
