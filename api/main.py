@@ -81,9 +81,9 @@ def home():
     return{
         "message": "Welcome to the Default Risk Prediction API",
         "docs": "/docs",
-        "helth": "/health",
-        "predict": "POST/predict",
-        "batch": "POST/predict/batch"
+        "health": "/health",
+        "predict": "POST /predict",
+        "batch": "POST /predict/batch"
     }
 
 @app.get("/health", tags=["Health"])
@@ -118,7 +118,7 @@ def predict_single(customer: CustomerData):
 def predict_batch(customers: List[CustomerData]):
     """Predict default risk for a batch of customers"""
     try:
-        input_df = pd.DataFrame([c.dict() for c in customers])
+        input_df = pd.DataFrame([c.model_dump() for c in customers])
         predictions = model.predict(input_df)
 
         # Format response
