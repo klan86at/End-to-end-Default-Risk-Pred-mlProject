@@ -2,205 +2,76 @@
 import streamlit as st
 import requests
 import pandas as pd
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 
-# Title
+API_SINGLE = "https://default-risk-api.onrender.com/predict"
+API_BATCH  = "https://default-risk-api.onrender.com/predict/batch"
+
+st.set_page_config(page_title="Loan Default Risk")
 st.title("Loan Default Risk Prediction")
 
-# --- 1. Single Customer Prediction ---
-st.header("👤 Single Customer Prediction")
+# --------------------------------------------------
+# 1) Single prediction
+# --------------------------------------------------
+with st.expander("👤 Single Customer"):
+    credit_score        = st.slider("Credit Score", 300, 855, 700)
+    income              = st.number_input("Annual Income ($)", 0, None, 50000)
+    loan_amount         = st.number_input("Loan Amount ($)", 1000, None, 10000)
+    loan_term           = st.slider("Loan Term (months)", 12, 360, 60)
+    interest_rate       = st.number_input("Interest Rate (%)", 0.1, 36.0, 5.5)
+    dti                 = st.slider("Debt-to-Income Ratio", 0.0, 1.0, 0.3)
+    employment_years    = st.slider("Employment Years", 0, 50, 5)
+    savings             = st.number_input("Savings Balance ($)", 0, None, 10000)
+    age                 = st.slider("Age", 18, 100, 35)
 
-# Input form
-credit_score = st.slider("Credit Score", 300, 855, 700)
-income = st.number_input("Annual Income ($)", min_value=0, value=50000)
-loan_amount = st.number_input("Loan Amount ($)", min_value=1000, value=10000)
-loan_term = st.slider("Loan Term (months)", 12, 360, 60)
-interest_rate = st.number_input("Interest Rate (%)", min_value=0.1, max_value=36.0, value=5.5)
-dti = st.slider("Debt-to-Income Ratio", 0.0, 1.0, 0.3)
-employment_years = st.slider("Employment Years", 0, 50, 5)
-savings = st.number_input("Savings Balance ($)", min_value=0, value=10000)
-age = st.slider("Age", 18, 100, 35)
-
-# Buttons
-col1, col2 = st.columns(2)
-with col1:
-    predict_btn = st.button("Predict Risk")
-with col2:
-    if st.button("Clear Inputs"):
-        st.rerun()
-
-if predict_btn:
-    api_url = "https://default-risk-api.onrender.com/predict"
-
-    data = {
-        "credit_score": credit_score,
-        "income": income,
-        "loan_amount": loan_amount,
-        "loan_term": loan_term,
-        "interest_rate": interest_rate,
-        "debt_to_income_ratio": dti,
-        "employment_years": employment_years,
-        "savings_balance": savings,
-        "age": age
-    }
-
-    try:
-        # Retry session
-        session = requests.Session()
-        retry = Retry(total=5, backoff_factor=2, status_forcelist=[429, 500, 502, 503, 504])
-        adapter = HTTPAdapter(max_retries=retry)
-        session.mount("http://", adapter)
-        session.mount("https://", adapter)
-
-        response = session.post(api_url, json=data, timeout=60)  # Increased timeout
-
-        if response.status_code == 200:
-            try:
-                result = response.json()
-                risk_score = result["predicted_default_risk_score"]
-                risk_level = result["risk_level"]
-
-                st.success(f"Predicted Risk Score: {risk_score:.4f}")
-                st.markdown(f"### Risk Level: `{risk_level}`")
-
-                # Download single result
-                single_df = pd.DataFrame([data])
-                single_df["predicted_default_risk_score"] = risk_score
-                single_df["risk_level"] = risk_level
-                csv = single_df.to_csv(index=False).encode("utf-8")
-                st.download_button(
-                    "📥 Download This Prediction",
-                    data=csv,
-                    file_name="single_prediction.csv",
-                    mime="text/csv"
-                )
-            except ValueError:
-                st.error("Invalid JSON response from API")
-                st.code(response.text)
+    if st.button("Predict Risk"):
+        payload = dict(
+            credit_score=credit_score,
+            income=income,
+            loan_amount=loan_amount,
+            loan_term=loan_term,
+            interest_rate=interest_rate,
+            debt_to_income_ratio=dti,
+            employment_years=employment_years,
+            savings_balance=savings,
+            age=age,
+        )
+        r = requests.post(API_SINGLE, json=payload, timeout=30)
+        if r.status_code == 200:
+            out = r.json()
+            st.success(f"Score: {out['predicted_default_risk_score']:.4f}")
+            st.info(f"Level: {out['risk_level']}")
         else:
-            st.error(f"API Error: {response.status_code}")
-            st.code(response.text)
-    except requests.exceptions.Timeout:
-        st.error("Request timed out. The API might be slow to wake up.")
-    except requests.exceptions.ConnectionError:
-        st.error("Failed to connect to API. The backend might be asleep.")
-    except Exception as e:
-        st.error(f"Unexpected error: {e}")
+            st.error(f"API error {r.status_code}: {r.text}")
 
+# --------------------------------------------------
+# 2) Batch prediction
+# --------------------------------------------------
+with st.expander("📊 Batch Prediction (CSV Upload)"):
 
-# --- 2. Batch Prediction ---
-st.header("Batch Prediction (Upload CSV)")
-
-# Sample CSV template
-sample_data = """credit_score,income,loan_amount,loan_term,interest_rate,debt_to_income_ratio,employment_years,savings_balance,age
+    sample = """credit_score,income,loan_amount,loan_term,interest_rate,debt_to_income_ratio,employment_years,savings_balance,age
 750,50000,10000,36,5.5,0.3,5,10000,35
 700,60000,15000,60,6.0,0.4,3,5000,40"""
+    st.download_button("Download sample CSV", sample, "sample.csv")
 
-st.download_button(
-    "🔽 Download Sample CSV Template",
-    data=sample_data,
-    file_name="sample_input.csv",
-    mime="text/csv"
-)
+    file = st.file_uploader("Upload CSV", type=["csv"])
+    if file:
+        df = pd.read_csv(file)
+        st.dataframe(df.head())
 
-uploaded_file = st.file_uploader("Upload a CSV file with customer data", type="csv")
+        required = ["credit_score","income","loan_amount","loan_term",
+                    "interest_rate","debt_to_income_ratio",
+                    "employment_years","savings_balance","age"]
+        if not set(required).issubset(df.columns):
+            st.error(f"Missing columns: {set(required) - set(df.columns)}")
+            st.stop()
 
-if uploaded_file is not None:
-    try:
-        batch_df = pd.read_csv(uploaded_file)
-        st.write("### Uploaded Data Preview")
-        st.dataframe(batch_df.head())
-
-        # Clear upload button
-        if st.button("🗑️ Clear Upload"):
-            st.rerun()
-
-        required_columns = [
-            "credit_score", "income", "loan_amount", "loan_term",
-            "interest_rate", "debt_to_income_ratio", "employment_years",
-            "savings_balance", "age"
-        ]
-
-        missing_cols = set(required_columns) - set(batch_df.columns)
-        if missing_cols:
-            st.error(f"Missing required columns: {missing_cols}")
-        else:
-            if st.button("🚀 Predict for All Customers"):
-                with st.spinner("Processing batch predictions..."):
-                    predictions = []
-                    api_url = "https://default-risk-api.onrender.com/predict/batch"  # ✅ No trailing space
-
-                    # Retry session
-                    session = requests.Session()
-                    retry = Retry(total=5, backoff_factor=2, status_forcelist=[429, 500, 502, 503, 504])
-                    adapter = HTTPAdapter(max_retries=retry)
-                    session.mount("http://", adapter)
-                    session.mount("https://", adapter)
-
-                    # --- batch_df already contains all required columns ---
-                    payload = batch_df[required_columns].to_dict(orient="records")
-
-                    try:
-                        response = session.post(
-                            api_url,
-                            json=payload,          # <-- send the list
-                            timeout=60
-                        )
-                        if response.status_code == 200:
-                            preds = response.json()  # list of dicts
-                            pred_df = pd.DataFrame(preds)
-                        else:
-                            st.error(f"Batch API Error: {response.status_code}")
-                            pred_df = pd.DataFrame(
-                                [{"predicted_default_risk_score": None,
-                                "risk_level": f"API Error {response.status_code}"}] * len(batch_df)
-                            )
-                    except Exception as e:
-                        st.error(f"Batch request failed: {e}")
-                        pred_df = pd.DataFrame(
-                            [{"predicted_default_risk_score": None, "risk_level": str(e)}] * len(batch_df)
-                        )
-
-                    result_df = pd.concat([batch_df, pred_df], axis=1)
-
-                    # Add predictions
-                    result_df = batch_df.copy()
-                    pred_df = pd.DataFrame(predictions)
-                    result_df = pd.concat([result_df, pred_df], axis=1)
-
-                    st.write("### Batch Predictions")
-                    st.dataframe(result_df)
-
-                    # Download options
-                    @st.cache_data
-                    def convert_df(df):
-                        return df.to_csv(index=False).encode("utf-8")
-
-                    csv = convert_df(result_df)
-                    json_data = result_df.to_json(orient="records")
-
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.download_button(
-                            "📥 Download as CSV",
-                            data=csv,
-                            file_name="predictions.csv",
-                            mime="text/csv"
-                        )
-                    with col2:
-                        st.download_button(
-                            "📤 Download as JSON",
-                            data=json_data,
-                            file_name="predictions.json",
-                            mime="application/json"
-                        )
-
-                    # Summary chart
-                    if "risk_level" in result_df.columns:
-                        st.write("### Prediction Summary")
-                        risk_counts = result_df["risk_level"].value_counts()
-                        st.bar_chart(risk_counts)
-
-    except Exception as e:
-        st.error(f"Error reading CSV: {str(e)}")
+        if st.button("Predict all"):
+            payload = df[required].to_dict(orient="records")
+            r = requests.post(API_BATCH, json=payload, timeout=60)
+            if r.status_code == 200:
+                preds = pd.DataFrame(r.json())
+                out = pd.concat([df, preds], axis=1)
+                st.dataframe(out)
+                st.download_button("Download CSV", out.to_csv(index=False), "batch.csv")
+            else:
+                st.error(f"API error {r.status_code}: {r.text}")
