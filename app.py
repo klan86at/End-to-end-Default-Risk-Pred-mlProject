@@ -65,7 +65,7 @@ if file:
         st.stop()
 
     if st.button("🚀 Predict all"):
-        payload = {"instances": df[cols].to_dict(orient="records")}
+        payload = {"customers": df[cols].to_dict(orient="records")}
         r = requests.post("https://default-risk-api.onrender.com/predict/batch",
                           json=payload, timeout=60)
         if r.ok:
