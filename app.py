@@ -46,32 +46,32 @@ with st.expander("👤 Single Customer"):
 # --------------------------------------------------
 # 2) Batch prediction
 # --------------------------------------------------
-with st.expander("📊 Batch Prediction (CSV Upload)"):
+with st.expander("Batch Prediction (CSV Upload)"):
 
     sample = """credit_score,income,loan_amount,loan_term,interest_rate,debt_to_income_ratio,employment_years,savings_balance,age
 750,50000,10000,36,5.5,0.3,5,10000,35
 700,60000,15000,60,6.0,0.4,3,5000,40"""
     st.download_button("Download sample CSV", sample, "sample.csv")
 
-    file = st.file_uploader("Upload CSV", type=["csv"])
-    if file:
-        df = pd.read_csv(file)
-        st.dataframe(df.head())
+file = st.file_uploader("Upload CSV", type=["csv"])
+if file:
+    df = pd.read_csv(file)
+    st.dataframe(df.head())
+    cols = ["credit_score","income","loan_amount","loan_term",
+            "interest_rate","debt_to_income_ratio",
+            "employment_years","savings_balance","age"]
+    if not set(cols).issubset(df.columns):
+        st.error("CSV missing required columns")
+        st.stop()
 
-        required = ["credit_score","income","loan_amount","loan_term",
-                    "interest_rate","debt_to_income_ratio",
-                    "employment_years","savings_balance","age"]
-        if not set(required).issubset(df.columns):
-            st.error(f"Missing columns: {set(required) - set(df.columns)}")
-            st.stop()
-
-        if st.button("Predict all"):
-            payload = df[required].to_dict(orient="records")
-            r = requests.post(API_BATCH, json=payload, timeout=60)
-            if r.status_code == 200:
-                preds = pd.DataFrame(r.json())
-                out = pd.concat([df, preds], axis=1)
-                st.dataframe(out)
-                st.download_button("Download CSV", out.to_csv(index=False), "batch.csv")
-            else:
-                st.error(f"API error {r.status_code}: {r.text}")
+    if st.button("Predict all"):
+        payload = df[cols].to_dict(orient="records")
+        r = requests.post("https://default-risk-api.onrender.com/predict/batch",
+                          json=payload, timeout=60)
+        if r.ok:
+            preds = pd.DataFrame(r.json()["predictions"])
+            out = pd.concat([df, preds], axis=1)
+            st.dataframe(out)
+            st.download_button("Download CSV", out.to_csv(index=False), "batch.csv")
+        else:
+            st.error(f"API error {r.status_code}: {r.text}")
