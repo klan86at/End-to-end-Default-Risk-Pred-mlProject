@@ -69,17 +69,23 @@ if file:
         "employment_years", "savings_balance", "age"
     ]
     if st.button("🚀 Predict all"):
-        payload = df[required].to_dict(orient="records")
-        r = requests.post(API_BATCH, json=payload, timeout=60)
-
-        # 👇 new debug
-        st.json(payload)          # show what we actually sent
-        st.write(r.status_code)   # 422
-        st.code(r.text)           # the raw error JSON
-        if r.ok:
-            preds = pd.DataFrame(r.json())
-            out = pd.concat([df, preds], axis=1)
-            st.dataframe(out)
-            st.download_button("📥 Download CSV", out.to_csv(index=False), "batch.csv")
-        else:
-            st.error(f"{r.status_code} – {r.text}")
+        # 1. Type conversion
+        payload = df[required].apply(pd.to_numeric, errors='ignore')
+        
+        # 2. Handle naming convention
+        payload = payload.rename(columns={
+            "debt_to_income_ratio": "debt-to-income-ratio"  # if needed
+        })
+        
+        # 3. Convert to API-ready format
+        records = payload.to_dict(orient='records')
+        
+        # 4. Debug output
+        st.json(records[0])  # Show first record
+        
+        # 5. Send with proper headers
+        headers = {"Content-Type": "application/json"}
+        r = requests.post(API_BATCH, json=records, headers=headers, timeout=60)
+        
+        if r.status_code == 422:
+            st.error(f"Validation error: {r.json()['detail']}")  # FastAPI error details
