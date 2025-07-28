@@ -4,7 +4,7 @@ import requests
 import pandas as pd
 
 API_SINGLE = "https://default-risk-api.onrender.com/predict"
-API_BATCH  = "https://default-risk-api.onrender.com/predict/batch"
+API_BATCH = "https://default-risk-api.onrender.com/predict/batch"
 
 st.set_page_config(page_title="Loan Default Risk")
 st.title("Loan Default Risk Prediction")
