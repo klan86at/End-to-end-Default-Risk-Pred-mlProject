@@ -69,9 +69,13 @@ if file:
         "employment_years", "savings_balance", "age"
     ]
     if st.button("🚀 Predict all"):
-        payload = df[required].to_dict(orient="records")   # ← raw list of dicts
-        r = requests.post("https://default-risk-api.onrender.com/predict/batch",
-                          json=payload, timeout=60)
+        payload = df[required].to_dict(orient="records")
+        r = requests.post(API_BATCH, json=payload, timeout=60)
+
+        # 👇 new debug
+        st.json(payload)          # show what we actually sent
+        st.write(r.status_code)   # 422
+        st.code(r.text)           # the raw error JSON
         if r.ok:
             preds = pd.DataFrame(r.json())
             out = pd.concat([df, preds], axis=1)
