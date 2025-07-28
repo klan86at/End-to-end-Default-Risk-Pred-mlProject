@@ -63,13 +63,17 @@ if file:
     if not set(cols).issubset(df.columns):
         st.error("CSV missing required columns")
         st.stop()
-
+    required = [
+        "credit_score", "income", "loan_amount", "loan_term",
+        "interest_rate", "debt_to_income_ratio",
+        "employment_years", "savings_balance", "age"
+    ]
     if st.button("🚀 Predict all"):
-        payload = {"customers": df[cols].to_dict(orient="records")}
+        payload = df[required].to_dict(orient="records")   # ← raw list of dicts
         r = requests.post("https://default-risk-api.onrender.com/predict/batch",
                           json=payload, timeout=60)
         if r.ok:
-            preds = pd.DataFrame(r.json()["predictions"])
+            preds = pd.DataFrame(r.json())
             out = pd.concat([df, preds], axis=1)
             st.dataframe(out)
             st.download_button("📥 Download CSV", out.to_csv(index=False), "batch.csv")
