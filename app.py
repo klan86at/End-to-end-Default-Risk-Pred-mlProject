@@ -2,7 +2,8 @@
 import streamlit as st
 import requests
 import pandas as pd
-import time
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 # Title
 st.title("Loan Default Risk Prediction")
@@ -11,7 +12,7 @@ st.title("Loan Default Risk Prediction")
 st.header("👤 Single Customer Prediction")
 
 # Input form
-credit_score = st.slider("Credit Score", 300, 850, 700)
+credit_score = st.slider("Credit Score", 300, 855, 700)
 income = st.number_input("Annual Income ($)", min_value=0, value=50000)
 loan_amount = st.number_input("Loan Amount ($)", min_value=1000, value=10000)
 loan_term = st.slider("Loan Term (months)", 12, 360, 60)
@@ -45,9 +46,15 @@ if predict_btn:
     }
 
     try:
-        # Add timeout to avoid hanging
-        response = requests.post(api_url, json=data, timeout=30)
-        
+        # Retry session
+        session = requests.Session()
+        retry = Retry(total=5, backoff_factor=2, status_forcelist=[429, 500, 502, 503, 504])
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount("http://", adapter)
+        session.mount("https://", adapter)
+
+        response = session.post(api_url, json=data, timeout=60)  # Increased timeout
+
         if response.status_code == 200:
             try:
                 result = response.json()
@@ -70,19 +77,19 @@ if predict_btn:
                 )
             except ValueError:
                 st.error("Invalid JSON response from API")
+                st.code(response.text)
         else:
             st.error(f"API Error: {response.status_code}")
             st.code(response.text)
     except requests.exceptions.Timeout:
         st.error("Request timed out. The API might be slow to wake up.")
     except requests.exceptions.ConnectionError:
-        st.error("Failed to connect to API. Check if the backend is live.")
+        st.error("Failed to connect to API. The backend might be asleep.")
     except Exception as e:
         st.error(f"Unexpected error: {e}")
 
 
 # --- 2. Batch Prediction ---
-
 st.header("Batch Prediction (Upload CSV)")
 
 # Sample CSV template
@@ -119,15 +126,22 @@ if uploaded_file is not None:
         if missing_cols:
             st.error(f"Missing required columns: {missing_cols}")
         else:
-            if st.button("Predict for All Customers"):
+            if st.button("🚀 Predict for All Customers"):
                 with st.spinner("Processing batch predictions..."):
                     predictions = []
                     api_url = "https://default-risk-api.onrender.com/predict/batch"  # ✅ No trailing space
 
+                    # Retry session
+                    session = requests.Session()
+                    retry = Retry(total=5, backoff_factor=2, status_forcelist=[429, 500, 502, 503, 504])
+                    adapter = HTTPAdapter(max_retries=retry)
+                    session.mount("http://", adapter)
+                    session.mount("https://", adapter)
+
                     for idx, row in batch_df.iterrows():
                         data = row[required_columns].to_dict()
                         try:
-                            response = requests.post(api_url, json=data, timeout=30)
+                            response = session.post(api_url, json=data, timeout=60)
                             if response.status_code == 200:
                                 pred = response.json()
                                 predictions.append({
