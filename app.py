@@ -138,31 +138,31 @@ if uploaded_file is not None:
                     session.mount("http://", adapter)
                     session.mount("https://", adapter)
 
-                    for idx, row in batch_df.iterrows():
-                        data = row[required_columns].to_dict()
-                        try:
-                            response = session.post(api_url, json=data, timeout=60)
-                            if response.status_code == 200:
-                                pred = response.json()
-                                predictions.append({
-                                    "predicted_default_risk_score": pred["predicted_default_risk_score"],
-                                    "risk_level": pred["risk_level"]
-                                })
-                            else:
-                                predictions.append({
-                                    "predicted_default_risk_score": None,
-                                    "risk_level": f"API Error {response.status_code}"
-                                })
-                        except requests.exceptions.Timeout:
-                            predictions.append({
-                                "predicted_default_risk_score": None,
-                                "risk_level": "Timeout"
-                            })
-                        except Exception as e:
-                            predictions.append({
-                                "predicted_default_risk_score": None,
-                                "risk_level": f"Error: {str(e)}"
-                            })
+                    # --- batch_df already contains all required columns ---
+                    payload = batch_df[required_columns].to_dict(orient="records")
+
+                    try:
+                        response = session.post(
+                            api_url,
+                            json=payload,          # <-- send the list
+                            timeout=60
+                        )
+                        if response.status_code == 200:
+                            preds = response.json()  # list of dicts
+                            pred_df = pd.DataFrame(preds)
+                        else:
+                            st.error(f"Batch API Error: {response.status_code}")
+                            pred_df = pd.DataFrame(
+                                [{"predicted_default_risk_score": None,
+                                "risk_level": f"API Error {response.status_code}"}] * len(batch_df)
+                            )
+                    except Exception as e:
+                        st.error(f"Batch request failed: {e}")
+                        pred_df = pd.DataFrame(
+                            [{"predicted_default_risk_score": None, "risk_level": str(e)}] * len(batch_df)
+                        )
+
+                    result_df = pd.concat([batch_df, pred_df], axis=1)
 
                     # Add predictions
                     result_df = batch_df.copy()
