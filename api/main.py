@@ -112,17 +112,22 @@ def predict_single(customer: CustomerData):
         logger.error(f"Prediction failed: {e}")
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
     
-@app.post("/predict/batch")
+@app.post("/predict/batch", response_model=BatchPredictionResponse, tags=["Batch Prediction"])
 def predict_batch(customers: List[CustomerData]):
     try:
         input_df = pd.DataFrame([c.model_dump() for c in customers])
         predictions = model.predict(input_df)
-        
-        return {
-            "predictions": [
-                {"predicted_default_risk_score": round(float(pred), 4)}
-                for pred in predictions
-            ]
-        }
+
+        result = []
+        for pred in predictions:
+            risk_level = "High" if pred > 0.7 else "Medium" if pred > 0.2 else "Low"
+            result.append({
+                "predicted_default_risk_score": round(float(pred), 4),
+                "risk_level": risk_level
+            })
+
+        logger.info(f"Batch prediction: {len(predictions)} customers")
+        return {"predictions": result}
     except Exception as e:
+        logger.error(f"Batch prediction failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Batch prediction error: {str(e)}")

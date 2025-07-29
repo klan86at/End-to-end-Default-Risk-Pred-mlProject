@@ -122,69 +122,76 @@ if uploaded_file is not None:
         missing_cols = set(required_columns) - set(df.columns)
         if missing_cols:
             st.error(f"❌ Missing required columns: {missing_cols}")
-        else:
-            if st.button("🚀 Predict for All Customers"):
-                with st.spinner("Processing predictions..."):
-                    predictions = []
-                    api_url = "https://default-risk-api.onrender.com/predict"  # Single endpoint
+            st.stop()
 
-                    # Add retry logic
-                    session = requests.Session()
-                    retry = Retry(
-                        total=5,
-                        backoff_factor=2,
-                        status_forcelist=[429, 500, 502, 503, 504],
-                    )
-                    adapter = HTTPAdapter(max_retries=retry)
-                    session.mount("http://", adapter)
-                    session.mount("https://", adapter)
+        # Convert to float and handle missing values
+        df[required_columns] = df[required_columns].astype(float).fillna(0)
 
-                    for idx, row in df.iterrows():
-                        data = row[required_columns].astype(float).to_dict()
-                        try:
-                            response = session.post(api_url, json=data, timeout=60)
-                            if response.status_code == 200:
-                                pred = response.json()
-                                predictions.append({
-                                    "predicted_default_risk_score": pred["predicted_default_risk_score"],
-                                    "risk_level": pred["risk_level"]
-                                })
-                            else:
-                                predictions.append({
-                                    "predicted_default_risk_score": None,
-                                    "risk_level": f"API Error {response.status_code}"
-                                })
-                        except Exception as e:
-                            predictions.append({
-                                "predicted_default_risk_score": None,
-                                "risk_level": str(e)
-                            })
+        if st.button("🚀 Predict for All Customers"):
+            with st.spinner("Processing predictions..."):
+                predictions = []
+                api_url = "https://default-risk-api.onrender.com/predict/batch"
 
-                    # Add results to DataFrame
-                    result_df = df.copy()
-                    pred_df = pd.DataFrame(predictions)
-                    result_df = pd.concat([result_df, pred_df], axis=1)
+                # Add retry logic
+                session = requests.Session()
+                retry = Retry(
+                    total=5,
+                    backoff_factor=2,
+                    status_forcelist=[429, 500, 502, 503, 504],
+                )
+                adapter = HTTPAdapter(max_retries=retry)
+                session.mount("http://", adapter)
+                session.mount("https://", adapter)
 
-                    st.write("### Batch Predictions")
-                    st.dataframe(result_df)
+                # Prepare payload as a list of dictionaries
+                payload = df[required_columns].to_dict(orient="records")
 
-                    # Download options
-                    @st.cache_data
-                    def convert_df(df):
-                        return df.to_csv(index=False).encode("utf-8")
+                try:
+                    response = session.post(api_url, json=payload, timeout=60)
+                    if response.status_code == 200:
+                        result = response.json()
+                        pred_df = pd.DataFrame(result["predictions"])
+                        result_df = pd.concat([df, pred_df], axis=1)
+                        st.write("### ✅ Batch Predictions")
+                        st.dataframe(result_df)
 
-                    csv = convert_df(result_df)
-                    st.download_button(
-                        "📥 Download as CSV",
-                        data=csv,
-                        file_name="predictions.csv",
-                        mime="text/csv"
-                    )
+                        # Download options
+                        @st.cache_data
+                        def convert_df(df):
+                            return df.to_csv(index=False).encode("utf-8")
 
-                    # Summary chart
-                    if "risk_level" in result_df.columns:
-                        st.write("### Prediction Summary")
-                        st.bar_chart(result_df["risk_level"].value_counts())
+                        csv = convert_df(result_df)
+                        json_data = result_df.to_json(orient="records")
+
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.download_button(
+                                "📥 Download as CSV",
+                                data=csv,
+                                file_name="predictions.csv",
+                                mime="text/csv"
+                            )
+                        with col2:
+                            st.download_button(
+                                "📤 Download as JSON",
+                                data=json_data,
+                                file_name="predictions.json",
+                                mime="application/json"
+                            )
+
+                        # Summary chart
+                        if "risk_level" in result_df.columns:
+                            st.write("### Prediction Summary")
+                            risk_counts = result_df["risk_level"].value_counts()
+                            st.bar_chart(risk_counts)
+
+                    else:
+                        st.error(f"Batch API Error: {response.status_code}")
+                        st.code(response.text)
+
+                except Exception as e:
+                    st.error(f"Connection failed: {str(e)}")
 
     except Exception as e:
         st.error(f"❌ Error reading CSV: {str(e)}")
+        st.code(traceback.format_exc())
