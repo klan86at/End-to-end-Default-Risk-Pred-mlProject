@@ -29,7 +29,6 @@ class CustomerData(BaseModel):
 
 class PredictionResponse(BaseModel):
     predicted_default_risk_score: float
-    risk_level: str
 
 class BatchPredictionResponse(BaseModel):
     predictions: List[PredictionResponse]
@@ -102,37 +101,28 @@ def predict_single(customer: CustomerData):
 
         # Predict
         prediction = model.predict(input_df)[0]
-        risk_level = "High" if prediction > 0.7 else "Medium" if prediction > 0.2 else "Low"
+        
 
-        logger.info(f"Prediction: {prediction:.4f}, Risk: {risk_level}")
+        logger.info(f"Prediction: {prediction:.4f}")
 
         return {
-            "predicted_default_risk_score": round(float(prediction), 4),
-            "risk_level": risk_level
+            "predicted_default_risk_score": round(float(prediction), 4)
         }
     except Exception as e:
         logger.error(f"Prediction failed: {e}")
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
     
-@app.post("/predict/batch", response_model=BatchPredictionResponse, tags=["Batch Prediction"])
+@app.post("/predict/batch")
 def predict_batch(customers: List[CustomerData]):
     try:
-        # Log incoming data
-        logger.info(f"Received batch: {len(customers)} customers")
-        
         input_df = pd.DataFrame([c.model_dump() for c in customers])
         predictions = model.predict(input_df)
-
-        result = []
-        for pred in predictions:
-            risk_level = "High" if pred > 0.7 else "Medium" if pred > 0.2 else "Low"
-            result.append({
-                "predicted_default_risk_score": round(float(pred), 4),
-                "risk_level": risk_level
-            })
-
-        logger.info(f"Batch prediction: {len(predictions)} customers")
-        return {"predictions": result}
+        
+        return {
+            "predictions": [
+                {"predicted_default_risk_score": round(float(pred), 4)}
+                for pred in predictions
+            ]
+        }
     except Exception as e:
-        logger.error(f"Batch prediction failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Batch prediction error: {str(e)}")
