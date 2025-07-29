@@ -4,6 +4,7 @@ import requests
 import pandas as pd
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+import traceback
 
 # --- Page Config ---
 st.set_page_config(page_title="Loan Risk Predictor", layout="centered")
@@ -88,11 +89,11 @@ if submitted:
     except Exception as e:
         st.error(f"🚨 Unexpected error: {e}")
 
+
 # --- 2. Batch Prediction ---
+st.header("📊 Batch Prediction (Upload CSV)")
 
-st.header("Batch Prediction (Upload CSV)")
-
-# Sample template
+# Sample CSV template
 sample_data = """credit_score,income,loan_amount,loan_term,interest_rate,debt_to_income_ratio,employment_years,savings_balance,age
 750,50000,10000,36,5.5,0.3,5,10000,35
 700,60000,15000,60,6.0,0.4,3,5000,40"""
@@ -104,66 +105,140 @@ st.download_button(
     mime="text/csv"
 )
 
-uploaded_file = st.file_uploader("Upload a CSV file", type="csv", key="batch_upload")
+uploaded_file = st.file_uploader("Upload a CSV file with customer data", type="csv")
 
 if uploaded_file is not None:
     try:
+        # Read and validate CSV
         df = pd.read_csv(uploaded_file)
-        st.write("### Uploaded Data Preview")
-        st.dataframe(df.head())
-
+        
+        # Validate required columns
         required_columns = [
             "credit_score", "income", "loan_amount", "loan_term",
             "interest_rate", "debt_to_income_ratio", "employment_years",
             "savings_balance", "age"
         ]
+        
+        missing_cols = set(required_columns) - set(df.columns)
+        if missing_cols:
+            st.error(f"❌ Missing required columns: {missing_cols}")
+            st.write("Required columns:", ", ".join(required_columns))
+            st.stop()
+        
+        # Check for empty values
+        if df[required_columns].isnull().any().any():
+            st.warning("⚠️ Data contains missing values. These will be filled with 0.")
+            df[required_columns] = df[required_columns].fillna(0)
+        
+        # Convert to numeric and validate
+        try:
+            df[required_columns] = df[required_columns].astype(float)
+        except ValueError as e:
+            st.error(f"❌ Data type error: {e}")
+            st.stop()
+        
+        st.write("### Uploaded Data Preview")
+        st.dataframe(df.head())
+        
+        # Clear upload button
+        if st.button("🗑️ Clear Upload"):
+            st.rerun()
 
-        missing = set(required_columns) - set(df.columns)
-        if missing:
-            st.error(f"❌ Missing columns: {missing}")
-        else:
-            if st.button("🚀 Predict for All Customers", key="batch_btn"):
-                with st.spinner("Calling API for all rows..."):
-                    results = []
-                    api_url = "https://default-risk-api.onrender.com/predict/batch"
-                    session = get_session()
+        if st.button("🚀 Predict for All Customers"):
+            with st.spinner("Processing batch predictions..."):
+                predictions = []
+                api_url = "https://default-risk-api.onrender.com/predict/batch"
+                
+                # Create retry session
+                session = requests.Session()
+                retry = Retry(
+                    total=5,
+                    backoff_factor=2,
+                    status_forcelist=[429, 500, 502, 503, 504],
+                )
+                adapter = HTTPAdapter(max_retries=retry)
+                session.mount("http://", adapter)
+                session.mount("https://", adapter)
 
-                    for _, row in df.iterrows():
-                        payload = row[required_columns].to_dict()
-                        try:
-                            resp = session.post(api_url, json=payload, timeout=60)
-                            if resp.status_code == 200:
-                                pred = resp.json()
-                                results.append({
-                                    "risk_score": pred["predicted_default_risk_score"],
+                for idx, row in df.iterrows():
+                    # Extract only required fields and convert to native Python types
+                    data = row[required_columns].astype(float).to_dict()
+                    
+                    try:
+                        response = session.post(api_url, json=data, timeout=60)
+                        
+                        if response.status_code == 200:
+                            try:
+                                pred = response.json()
+                                predictions.append({
+                                    "predicted_default_risk_score": pred["predicted_default_risk_score"],
                                     "risk_level": pred["risk_level"]
                                 })
-                            else:
-                                results.append({
-                                    "risk_score": "Error",
-                                    "risk_level": f"Status {resp.status_code}"
+                            except (ValueError, KeyError) as e:
+                                predictions.append({
+                                    "predicted_default_risk_score": None,
+                                    "risk_level": f"JSON Parse Error: {str(e)}"
                                 })
-                        except Exception as e:
-                            results.append({
-                                "risk_score": "Timeout",
-                                "risk_level": "Connection Error"
+                        else:
+                            predictions.append({
+                                "predicted_default_risk_score": None,
+                                "risk_level": f"API Error {response.status_code}"
                             })
+                            
+                    except requests.exceptions.Timeout:
+                        predictions.append({
+                            "predicted_default_risk_score": None,
+                            "risk_level": "Timeout"
+                        })
+                    except requests.exceptions.ConnectionError:
+                        predictions.append({
+                            "predicted_default_risk_score": None,
+                            "risk_level": "Connection Failed"
+                        })
+                    except Exception as e:
+                        predictions.append({
+                            "predicted_default_risk_score": None,
+                            "risk_level": f"Error: {str(e)}"
+                        })
 
-                    # Add predictions
-                    result_df = df.copy()
-                    pred_df = pd.DataFrame(results)
-                    result_df = pd.concat([result_df, pred_df], axis=1)
+                # Add predictions to dataframe
+                result_df = df.copy()
+                pred_df = pd.DataFrame(predictions)
+                result_df = pd.concat([result_df, pred_df], axis=1)
 
-                    st.write("### ✅ Predictions")
-                    st.dataframe(result_df)
+                st.write("### ✅ Batch Predictions")
+                st.dataframe(result_df)
 
-                    # Download
-                    csv = result_df.to_csv(index=False).encode("utf-8")
-                    st.download_button("📥 Download Predictions (CSV)", csv, "batch_predictions.csv", "text/csv")
+                # Download options
+                @st.cache_data
+                def convert_df(df):
+                    return df.to_csv(index=False).encode("utf-8")
 
-                    # Summary chart
+                csv = convert_df(result_df)
+                json_data = result_df.to_json(orient="records")
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.download_button(
+                        "📥 Download as CSV",
+                        data=csv,
+                        file_name="predictions.csv",
+                        mime="text/csv"
+                    )
+                with col2:
+                    st.download_button(
+                        "📤 Download as JSON",
+                        data=json_data,
+                        file_name="predictions.json",
+                        mime="application/json"
+                    )
+
+                # Summary chart
+                if "risk_level" in result_df.columns:
                     st.write("### Prediction Summary")
-                    st.bar_chart(result_df["risk_level"].value_counts())
+                    risk_counts = result_df["risk_level"].value_counts()
+                    st.bar_chart(risk_counts)
 
     except Exception as e:
-        st.error(f"❌ Error reading file: {str(e)}")
+        st.error(f"❌ Error reading CSV: {str(e)}")
+        st.code(traceback.format_exc())
