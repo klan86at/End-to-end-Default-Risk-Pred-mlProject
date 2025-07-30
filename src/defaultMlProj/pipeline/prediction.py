@@ -1,64 +1,85 @@
 # prediction.py
 import pandas as pd
+import joblib
 from pathlib import Path
 from defaultMlProj.constants.constant import *
 from defaultMlProj.utils.common import read_yaml, load_model
 from defaultMlProj.config.configuration import ConfigurationManager
 
+# Constants
+pred_threshold = 0.6
+required_features = [
+    "credit_score", "income", "loan_amount", "loan_term",
+    "interest_rate", "debt_to_income_ratio", "employment_years",
+    "savings_balance", "age"
+]
 
-def predict_single(customer_data: dict, model) -> dict:
+def predict_single(customer_data: dict, model, preprocessor) -> dict:
     """ Predicts the risk for a single customer.
     Args:
         customer_data (dict): Customer data with features.
         model: Trained model object.
+        preprocessor: Fitted ColumnTransfer for scaling.
     Returns:
         dict: Prediction result with risk score and label.
     """
-    required_keys = [
-        "credit_score", "income", "loan_amount", "loan_term",
-        "interest_rate", "debt_to_income_ratio", "employment_years",
-        "savings_balance", "age"
-    ]
-    if not all(k in customer_data for k in required_keys):
-        raise ValueError("Missing required fields")
-
+    # Validate input
+    missing = [k for k in required_features if k not in customer_data]
+    if missing:
+        raise ValueError(f"Missing required fields: {missing}")
+    # Create DataFrame
     input_df = pd.DataFrame([customer_data])
-    prediction = model.predict(input_df)[0]
     
-    return {
+    # Confirm column oreder matches training
+    try:
+        input_df = input_df[required_features]
+    except KeyError as e:
+        raise KeyError(f"Invalid input schema: {e}")
+    
+    # Apply preprocessing (scaling)
+    try:
+        transformed_input = preprocessor.transform(input_df)
+    except Exception as e:
+        raise RuntimeError(f"Preprocessing failed: {e}")
+    
+    # Predict
+    try:
+        prediction = model.predict(transformed_input)[0]
+        probability = (
+            model.predict_proba(transformed_input)[0].tolist()
+            if hasattr(model, "predict_proba")
+            else None
+        )
+    except Exception as e:
+        raise RuntimeError(f"Model Prediction failed: {e}")
+    
+    # Generate result
+    risk_level = "High" if prediction >= pred_threshold else "Low"
+
+    results = {
         "predicted_default_risk_score": round(float(prediction), 4),
-        "risk_level": "High" if prediction > 0.7 else "Low"
+        "risk_level": risk_level,
+        "threshold_used": pred_threshold,
+        "probability": probability  # Optional: class probabilities
     }
-
-
-def predict_batch(input_data: pd.DataFrame, model) -> pd.DataFrame:
-    """ Predicts the risk for a batch of customers.
-    Args:
-        input_data (pd.DataFrame): DataFrame with customer features.
-        model: Trained model object.
-    Returns:
-        pd.DataFrame: DataFrame with predictions and risk levels.
-    """
-    if not isinstance(input_data, pd.DataFrame):
-        raise ValueError("Input data must be a pandas DataFrame.")
     
-    predictions = model.predict(input_data)
-    
-    result_df = pd.DataFrame()
-    result_df['predicted_default_risk_score'] = predictions
-    result_df['risk_level'] = [
-        "High" if pred > 0.7 else "Low" for pred in predictions
-    ]
-    
-    return result_df
+    return results
 
 
 if __name__ == "__main__":
-    # Load model once
+    # Load cnfiguration and artifacts
     config = ConfigurationManager()
     serving_config = config.get_model_serving_config()
-    model = load_model(serving_config.model_path)
 
+    # Load model and preprocessor
+    model = load_model(serving_config.model_path)
+    preprocessor_path = Path(serving_config.model_dir) / "preprocessor.pkl"
+    preprocessor = joblib.load(preprocessor_path)
+
+    print(f"Loaded model from {serving_config.model_path}")
+    print(f"Loaded preprocessor from {preprocessor_path}")
+
+    # Testing single prediction
     sample_data = {
         "credit_score": 750,
         "income": 50000,
@@ -71,11 +92,8 @@ if __name__ == "__main__":
         "age": 35
     }
 
-    # Predict single
-    result = predict_single(sample_data, model)
-    print(f"Single Customer Prediction: {result}")
-
-    # Predict batch
-    batch_data = pd.DataFrame([sample_data, sample_data])
-    batch_predictions = predict_batch(batch_data, model)
-    print(f"Batch Predictions:\n{batch_predictions}")
+    try:
+        result = predict_single(sample_data, model, preprocessor)
+        print(f"\n Single Customer Prediction: {result}")
+    except Exception as e:
+        print(f"\n Prediction failed: {e}")
