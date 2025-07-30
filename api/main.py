@@ -52,8 +52,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     try:
         config = ConfigurationManager()
         model_serving_config = config.get_model_serving_config()
+        logger.info(f"Raw model_path from config: {model_serving_config.model_path}")
+        logger.info(f"Type: {type(model_serving_config.model_path)}")
         # Load Model
-        model_path = Path(model_serving_id=model_serving_config.model_path)
+        model_path = Path(model_serving_config.model_path)
         if not model_path.exists():
             raise FileNotFoundError(f"Model file not found at: {model_path}")
         
