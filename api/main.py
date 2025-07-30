@@ -2,10 +2,12 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from typing import List, AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 import pandas as pd
 import logging
 
-# importing config and utils
+
+# importing configuration and utils
 from defaultMlProj.config.configuration import ConfigurationManager
 from defaultMlProj.utils.common import load_model
 
@@ -13,7 +15,7 @@ from defaultMlProj.utils.common import load_model
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 1. Pydantic Models (Input/Output)
+# 1. Pydantic Models 
 
 class CustomerData(BaseModel):
     credit_score:  float = Field(..., gt=300, lt=850, description="Credit score between 300-850")        
@@ -29,38 +31,49 @@ class CustomerData(BaseModel):
 
 class PredictionResponse(BaseModel):
     predicted_default_risk_score: float
-
-class BatchPredictionResponse(BaseModel):
-    predictions: List[PredictionResponse]
-
+    risk_level: str
+    threshold: float
 
 
 # Global variable to hold the model
 model = None
+pred_threshold = 0.6
+feat_order = [
+    "credit_score", "income", "loan_amount", "loan_term",
+    "interest_rate", "debt_to_income_ratio", "employment_years",
+    "savings_balance", "age"
+]
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Handle startup and shutdown events"""
     global model
+
     try:
         config = ConfigurationManager()
         model_serving_config = config.get_model_serving_config()
-        model = load_model(model_serving_config.model_path)
-        logger.info("Model loaded succesfully at startup")
+        # Load Model
+        model_path = Path(model_serving_id=model_serving_config.model_path)
+        if not model_path.exists():
+            raise FileNotFoundError(f"Model file not found at: {model_path}")
+        
+        model = load_model(model_path)
+        logger.info(f"Model loaded from {model_path}")
+
     except Exception as e:
-        logger.error(f"Failed to load model: {e}")
+        logger.error(f"Failed to load model at startup: {e}")
         raise
 
     yield 
 
     # Shutdown: cleanup
-    print("Shutting down...")
+    print("Shutting down API...")
 
-# 2.Load Model at start up
+# FastAPI App
 
 app = FastAPI(
     title="Default Risk Prediction API",
-    description="Predict loan default risk score using model built with FastAPI & scikit-learn",
+    description="Predict loan default risk score using a trianed model built with FastAPI & scikit-learn",
     version="1.0.0",
     lifespan=lifespan,
     contact={
@@ -72,8 +85,9 @@ app = FastAPI(
         "url": "https://opensource.org/licenses/MIT",
     },
 )
-
+# ================
 # 3. API Endpoints
+# ================
 
 @app.get("/", tags=["Home"])
 def home():
@@ -81,8 +95,7 @@ def home():
         "message": "Welcome to the Default Risk Prediction API",
         "docs": "/docs",
         "health": "/health",
-        "predict": "POST /predict",
-        "batch": "POST /predict/batch"
+        "predict": "POST /predict"
     }
 
 @app.get("/health", tags=["Health"])
@@ -93,41 +106,50 @@ def health_check():
     return {"status": "healthy"}
 
 
-@app.post("/predict", response_model=PredictionResponse, tags=["Single Prediction"])
+@app.post("/predict", response_model=PredictionResponse, tags=["Prediction"])
 def predict_single(customer: CustomerData):
-    """Predict default risk for a single customer"""
+    """
+    Predict default risk for a single customer.
+    The input is validated, ordered, and passed through the full stacking pipeline.
+    """
     try:
+        input_dict = customer.model_dump()
         input_df = pd.DataFrame([customer.model_dump()])
 
-        # Predict
-        prediction = model.predict(input_df)[0]
+        # Enforcing col order to match training
+        try:
+            input_df = input_df[feat_order]
+        except KeyError as e:
+            logger.error(f"Missing or extra columns in input data: {e}")
+            raise HTTPException(status_code=400, detail=f"Missing required fields: {e}")
         
-
-        logger.info(f"Prediction: {prediction:.4f}")
-
-        return {
-            "predicted_default_risk_score": round(float(prediction), 4)
+        # Predict
+        try:
+            prediction = model.predict(input_df)[0]
+        except Exception as e:
+            logger.error(f"Model prediction failed: {e}")
+            raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
+        
+        # Determining risk level
+        risk_level = (
+            "High" if prediction >= pred_threshold else
+            "Medium" if prediction >= 0.2 else
+            "Low"
+        )
+        result = {
+            "predicted_default_risk_score": round(float(prediction), 4),
+            "risk_level": risk_level,
+            "threshold_used": pred_threshold
         }
+        logger.info(f"Prediction result: {result}")
+        return result
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Prediction failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
     
-@app.post("/predict/batch", response_model=BatchPredictionResponse, tags=["Batch Prediction"])
-def predict_batch(customers: List[CustomerData]):
-    try:
-        input_df = pd.DataFrame([c.model_dump() for c in customers])
-        predictions = model.predict(input_df)
-
-        result = []
-        for pred in predictions:
-            risk_level = "High" if pred > 0.7 else "Medium" if pred > 0.2 else "Low"
-            result.append({
-                "predicted_default_risk_score": round(float(pred), 4),
-                "risk_level": risk_level
-            })
-
-        logger.info(f"Batch prediction: {len(predictions)} customers")
-        return {"predictions": result}
-    except Exception as e:
-        logger.error(f"Batch prediction failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Batch prediction error: {str(e)}")
+# Version endpoint
+@app.get("/version", tags=["Meta"])
+def version():
+    return {"version": "1.0.0", "status": "single-prediction-only"}
