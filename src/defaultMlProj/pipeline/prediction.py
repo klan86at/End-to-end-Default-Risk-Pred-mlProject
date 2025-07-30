@@ -14,12 +14,11 @@ required_features = [
     "savings_balance", "age"
 ]
 
-def predict_single(customer_data: dict, model, preprocessor) -> dict:
+def predict_single(customer_data: dict, model) -> dict:
     """ Predicts the risk for a single customer.
     Args:
         customer_data (dict): Customer data with features.
-        model: Trained model object.
-        preprocessor: Fitted ColumnTransfer for scaling.
+        model: Trained model object(StackingRegressor with internal scaling).
     Returns:
         dict: Prediction result with risk score and label.
     """
@@ -36,24 +35,21 @@ def predict_single(customer_data: dict, model, preprocessor) -> dict:
     except KeyError as e:
         raise KeyError(f"Invalid input schema: {e}")
     
-    # Apply preprocessing (scaling)
+    # Predict(scaling internal)
     try:
-        transformed_input = preprocessor.transform(input_df)
-    except Exception as e:
-        raise RuntimeError(f"Preprocessing failed: {e}")
-    
-    # Predict
-    try:
-        prediction = model.predict(transformed_input)[0]
-        probability = (
-            model.predict_proba(transformed_input)[0].tolist()
-            if hasattr(model, "predict_proba")
-            else None
-        )
+        prediction = model.predict(input_df)[0]
     except Exception as e:
         raise RuntimeError(f"Model Prediction failed: {e}")
-    
-    # Generate result
+    # get prediction probabilities
+    probability = None
+    if hasattr(model, "predict_proba"):
+        try:
+            proba = model.predict_proba(input_df)
+            probability = [round(float(p), 4) for p in proba[0]]
+        except Exception:
+            probability = "Unavailable (predict_proba failed)"
+
+    # Classify risk level
     risk_level = "High" if prediction >= pred_threshold else "Low"
 
     results = {
@@ -65,19 +61,17 @@ def predict_single(customer_data: dict, model, preprocessor) -> dict:
     
     return results
 
-
 if __name__ == "__main__":
     # Load cnfiguration and artifacts
     config = ConfigurationManager()
     serving_config = config.get_model_serving_config()
 
     # Load model and preprocessor
-    model = load_model(serving_config.model_path)
-    preprocessor_path = Path(serving_config.model_dir) / "preprocessor.pkl"
-    preprocessor = joblib.load(preprocessor_path)
+    model_path = serving_config.model_path
+    model = load_model(model_path)
 
-    print(f"Loaded model from {serving_config.model_path}")
-    print(f"Loaded preprocessor from {preprocessor_path}")
+    print(f"Model loaded model from {model_path}")
+    print(f"Model type: {type(model).__name__}")
 
     # Testing single prediction
     sample_data = {
@@ -93,7 +87,8 @@ if __name__ == "__main__":
     }
 
     try:
-        result = predict_single(sample_data, model, preprocessor)
-        print(f"\n Single Customer Prediction: {result}")
+        result = predict_single(sample_data, model)
+        print(f"\n Single Customer Prediction: \n{result}")
     except Exception as e:
         print(f"\n Prediction failed: {e}")
+        raise
