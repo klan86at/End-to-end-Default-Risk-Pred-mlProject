@@ -141,7 +141,7 @@ def predict_single(customer: CustomerData):
         result = {
             "predicted_default_risk_score": round(float(prediction), 4),
             "risk_level": risk_level,
-            "threshold_used": pred_threshold
+            "threshold": pred_threshold
         }
         logger.info(f"Prediction result: {result}")
         return result
