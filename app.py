@@ -57,7 +57,7 @@ with st.form("Prediction_form"):
         savings = st.number_input("Savings Balance ($)", min_value=0, value=10000)
         age = st.slider("Age", 18, 100, 35)
 
-    submitted = st.form_submit_button("Predict Risk", type="primary")
+    submitted = st.form_submit_button("Predict Risk", type="secondary")
 
 if submitted:
     data = {
