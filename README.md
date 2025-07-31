@@ -14,12 +14,14 @@
 
 <em>Built with the tools and technologies:</em>
 
+<img src="https://img.shields.io/badge/JSON-000000.svg?style=default&logo=JSON&logoColor=white" alt="JSON">
 <img src="https://img.shields.io/badge/scikitlearn-F7931E.svg?style=default&logo=scikit-learn&logoColor=white" alt="scikitlearn">
 <img src="https://img.shields.io/badge/tqdm-FFC107.svg?style=default&logo=tqdm&logoColor=black" alt="tqdm">
 <img src="https://img.shields.io/badge/FastAPI-009688.svg?style=default&logo=FastAPI&logoColor=white" alt="FastAPI">
 <img src="https://img.shields.io/badge/NumPy-013243.svg?style=default&logo=NumPy&logoColor=white" alt="NumPy">
 <img src="https://img.shields.io/badge/MLflow-0194E2.svg?style=default&logo=MLflow&logoColor=white" alt="MLflow">
 <br>
+<img src="https://img.shields.io/badge/Docker-2496ED.svg?style=default&logo=Docker&logoColor=white" alt="Docker">
 <img src="https://img.shields.io/badge/Python-3776AB.svg?style=default&logo=Python&logoColor=white" alt="Python">
 <img src="https://img.shields.io/badge/Plotly-3F4F75.svg?style=default&logo=Plotly&logoColor=white" alt="Plotly">
 <img src="https://img.shields.io/badge/pandas-150458.svg?style=default&logo=pandas&logoColor=white" alt="pandas">
@@ -67,13 +69,17 @@
 └── /
     ├── .github
     │   └── workflows
+    ├── api
+    │   └── main.py
     ├── app.py
     ├── artifacts
     │   ├── data_ingestion
     │   ├── data_transformation
+    │   ├── model_evaluation
     │   └── model_trainer
     ├── config
     │   └── config.yaml
+    ├── Dockerfile
     ├── LICENSE
     ├── logs
     │   └── running_logs.log
@@ -85,11 +91,12 @@
     │   └── trials.ipynb
     ├── params.yaml
     ├── README.md
+    ├── requirements-streamlit.txt
     ├── requirements.txt
     ├── setup.py
     ├── src
     │   ├── defaultMlProj
-    │   └── mlProject.egg-info
+    │   └── defaultMlProj.egg-info
     ├── template.py
     └── templates
         └── index.html
@@ -117,6 +124,10 @@
 					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
 				</tr>
 				<tr style='border-bottom: 1px solid #eee;'>
+					<td style='padding: 8px;'><b><a href='/Dockerfile'>Dockerfile</a></b></td>
+					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+				</tr>
+				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/LICENSE'>LICENSE</a></b></td>
 					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
 				</tr>
@@ -129,6 +140,10 @@
 					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
 				</tr>
 				<tr style='border-bottom: 1px solid #eee;'>
+					<td style='padding: 8px;'><b><a href='/requirements-streamlit.txt'>requirements-streamlit.txt</a></b></td>
+					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+				</tr>
+				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/requirements.txt'>requirements.txt</a></b></td>
 					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
 				</tr>
@@ -138,6 +153,26 @@
 				</tr>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/template.py'>template.py</a></b></td>
+					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+				</tr>
+			</table>
+		</blockquote>
+	</details>
+	<!-- api Submodule -->
+	<details>
+		<summary><b>api</b></summary>
+		<blockquote>
+			<div class='directory-path' style='padding: 8px 0; color: #666;'>
+				<code><b>⦿ api</b></code>
+			<table style='width: 100%; border-collapse: collapse;'>
+			<thead>
+				<tr style='background-color: #f8f9fa;'>
+					<th style='width: 30%; text-align: left; padding: 8px;'>File Name</th>
+					<th style='text-align: left; padding: 8px;'>Summary</th>
+				</tr>
+			</thead>
+				<tr style='border-bottom: 1px solid #eee;'>
+					<td style='padding: 8px;'><b><a href='/api/main.py'>main.py</a></b></td>
 					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
 				</tr>
 			</table>
@@ -217,6 +252,26 @@
 		<blockquote>
 			<div class='directory-path' style='padding: 8px 0; color: #666;'>
 				<code><b>⦿ artifacts</b></code>
+			<!-- model_evaluation Submodule -->
+			<details>
+				<summary><b>model_evaluation</b></summary>
+				<blockquote>
+					<div class='directory-path' style='padding: 8px 0; color: #666;'>
+						<code><b>⦿ artifacts.model_evaluation</b></code>
+					<table style='width: 100%; border-collapse: collapse;'>
+					<thead>
+						<tr style='background-color: #f8f9fa;'>
+							<th style='width: 30%; text-align: left; padding: 8px;'>File Name</th>
+							<th style='text-align: left; padding: 8px;'>Summary</th>
+						</tr>
+					</thead>
+						<tr style='border-bottom: 1px solid #eee;'>
+							<td style='padding: 8px;'><b><a href='/artifacts/model_evaluation/metrics.json'>metrics.json</a></b></td>
+							<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+						</tr>
+					</table>
+				</blockquote>
+			</details>
 			<!-- model_trainer Submodule -->
 			<details>
 				<summary><b>model_trainer</b></summary>
@@ -245,12 +300,12 @@
 		<blockquote>
 			<div class='directory-path' style='padding: 8px 0; color: #666;'>
 				<code><b>⦿ src</b></code>
-			<!-- mlProject.egg-info Submodule -->
+			<!-- defaultMlProj.egg-info Submodule -->
 			<details>
-				<summary><b>mlProject.egg-info</b></summary>
+				<summary><b>defaultMlProj.egg-info</b></summary>
 				<blockquote>
 					<div class='directory-path' style='padding: 8px 0; color: #666;'>
-						<code><b>⦿ src.mlProject.egg-info</b></code>
+						<code><b>⦿ src.defaultMlProj.egg-info</b></code>
 					<table style='width: 100%; border-collapse: collapse;'>
 					<thead>
 						<tr style='background-color: #f8f9fa;'>
@@ -259,19 +314,19 @@
 						</tr>
 					</thead>
 						<tr style='border-bottom: 1px solid #eee;'>
-							<td style='padding: 8px;'><b><a href='/src/mlProject.egg-info/dependency_links.txt'>dependency_links.txt</a></b></td>
+							<td style='padding: 8px;'><b><a href='/src/defaultMlProj.egg-info/dependency_links.txt'>dependency_links.txt</a></b></td>
 							<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
 						</tr>
 						<tr style='border-bottom: 1px solid #eee;'>
-							<td style='padding: 8px;'><b><a href='/src/mlProject.egg-info/PKG-INFO'>PKG-INFO</a></b></td>
+							<td style='padding: 8px;'><b><a href='/src/defaultMlProj.egg-info/PKG-INFO'>PKG-INFO</a></b></td>
 							<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
 						</tr>
 						<tr style='border-bottom: 1px solid #eee;'>
-							<td style='padding: 8px;'><b><a href='/src/mlProject.egg-info/SOURCES.txt'>SOURCES.txt</a></b></td>
+							<td style='padding: 8px;'><b><a href='/src/defaultMlProj.egg-info/SOURCES.txt'>SOURCES.txt</a></b></td>
 							<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
 						</tr>
 						<tr style='border-bottom: 1px solid #eee;'>
-							<td style='padding: 8px;'><b><a href='/src/mlProject.egg-info/top_level.txt'>top_level.txt</a></b></td>
+							<td style='padding: 8px;'><b><a href='/src/defaultMlProj.egg-info/top_level.txt'>top_level.txt</a></b></td>
 							<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
 						</tr>
 					</table>
@@ -302,6 +357,10 @@
 								</tr>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/components/data_transformation.py'>data_transformation.py</a></b></td>
+									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+								</tr>
+								<tr style='border-bottom: 1px solid #eee;'>
+									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/components/model_evaluation.py'>model_evaluation.py</a></b></td>
 									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
 								</tr>
 								<tr style='border-bottom: 1px solid #eee;'>
@@ -385,6 +444,10 @@
 								</tr>
 							</thead>
 								<tr style='border-bottom: 1px solid #eee;'>
+									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/pipeline/prediction.py'>prediction.py</a></b></td>
+									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+								</tr>
+								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/pipeline/stage_data_ingestion.py'>stage_data_ingestion.py</a></b></td>
 									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
 								</tr>
@@ -393,11 +456,11 @@
 									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
 								</tr>
 								<tr style='border-bottom: 1px solid #eee;'>
-									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/pipeline/stage_model_trainer.py'>stage_model_trainer.py</a></b></td>
+									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/pipeline/stage_model_evaluation.py'>stage_model_evaluation.py</a></b></td>
 									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
 								</tr>
 								<tr style='border-bottom: 1px solid #eee;'>
-									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/pipeline/training_pipeline.py'>training_pipeline.py</a></b></td>
+									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/pipeline/stage_model_trainer.py'>stage_model_trainer.py</a></b></td>
 									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
 								</tr>
 							</table>
@@ -439,6 +502,7 @@ This project requires the following dependencies:
 
 - **Programming Language:** Python
 - **Package Manager:** Pip
+- **Container Runtime:** Docker
 
 ### Installation
 
@@ -459,6 +523,17 @@ Build  from the source and intsall dependencies:
 3. **Install the dependencies:**
 
 <!-- SHIELDS BADGE CURRENTLY DISABLED -->
+	<!-- [![docker][docker-shield]][docker-link] -->
+	<!-- REFERENCE LINKS -->
+	<!-- [docker-shield]: https://img.shields.io/badge/Docker-2CA5E0.svg?style={badge_style}&logo=docker&logoColor=white -->
+	<!-- [docker-link]: https://www.docker.com/ -->
+
+	**Using [docker](https://www.docker.com/):**
+
+	```sh
+	❯ docker build -t / .
+	```
+<!-- SHIELDS BADGE CURRENTLY DISABLED -->
 	<!-- [![pip][pip-shield]][pip-link] -->
 	<!-- REFERENCE LINKS -->
 	<!-- [pip-shield]: https://img.shields.io/badge/Pip-3776AB.svg?style={badge_style}&logo=pypi&logoColor=white -->
@@ -474,6 +549,10 @@ Build  from the source and intsall dependencies:
 
 Run the project with:
 
+**Using [docker](https://www.docker.com/):**
+```sh
+docker run -it {image_name}
+```
 **Using [pip](https://pypi.org/project/pip/):**
 ```sh
 python {entrypoint}
