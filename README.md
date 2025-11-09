@@ -1,11 +1,11 @@
 <div id="top">
-
+Credit Risk Default Score Prediction Project
 <!-- HEADER STYLE: CLASSIC -->
 <div align="center">
-Credit Risk Default Score Prediction Project
-<img src="readmeai/assets/logos/purple.svg" width="30%" style="position: relative; top: 0; right: 0;" alt="Project Logo"/>
 
-# <code>❯ ## 🧩 </code>
+<!-- <img src="readmeai/assets/logos/purple.svg" width="30%" style="position: relative; top: 0; right: 0;" alt="Project Logo"/> -->
+
+<!-- # <code>❯ ## 🧩 </code> -->
 
 <em></em>
 
@@ -132,39 +132,39 @@ Credit Default Prediction — A machine learning project that predicts the likel
 			</thead>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/app.py'>app.py</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ Setup our frontend with streamlit</code></td>
 				</tr>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/Dockerfile'>Dockerfile</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ Build image for model deployment</code></td>
 				</tr>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/LICENSE'>LICENSE</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ MIT License</code></td>
 				</tr>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/main.py'>main.py</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ Executes the data stages</code></td>
 				</tr>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/params.yaml'>params.yaml</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ Holds the model parameters</code></td>
 				</tr>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/requirements-streamlit.txt'>requirements-streamlit.txt</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ Necessary libraries for running steamlit frontend</code></td>
 				</tr>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/requirements.txt'>requirements.txt</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ Libraries for running the project</code></td>
 				</tr>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/setup.py'>setup.py</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ Project setup</code></td>
 				</tr>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/template.py'>template.py</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ Project template file</code></td>
 				</tr>
 			</table>
 		</blockquote>
@@ -184,7 +184,7 @@ Credit Default Prediction — A machine learning project that predicts the likel
 			</thead>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/api/main.py'>main.py</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ FASTAPI</code></td>
 				</tr>
 			</table>
 		</blockquote>
@@ -204,7 +204,7 @@ Credit Default Prediction — A machine learning project that predicts the likel
 			</thead>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/config/config.yaml'>config.yaml</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ Configuration file</code></td>
 				</tr>
 			</table>
 		</blockquote>
@@ -224,15 +224,15 @@ Credit Default Prediction — A machine learning project that predicts the likel
 			</thead>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/notebook/EDA_DEFAULTPRED.ipynb'>EDA_DEFAULTPRED.ipynb</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ Notebook</code></td>
 				</tr>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/notebook/MODEL_TRAINER.ipynb'>MODEL_TRAINER.ipynb</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ Model trainer notebook</code></td>
 				</tr>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/notebook/trials.ipynb'>trials.ipynb</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ Trials notebook</code></td>
 				</tr>
 			</table>
 		</blockquote>
@@ -252,7 +252,7 @@ Credit Default Prediction — A machine learning project that predicts the likel
 			</thead>
 				<tr style='border-bottom: 1px solid #eee;'>
 					<td style='padding: 8px;'><b><a href='/templates/index.html'>index.html</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+					<td style='padding: 8px;'>Code>❯ HTML file</code></td>
 				</tr>
 			</table>
 		</blockquote>
@@ -278,7 +278,7 @@ Credit Default Prediction — A machine learning project that predicts the likel
 					</thead>
 						<tr style='border-bottom: 1px solid #eee;'>
 							<td style='padding: 8px;'><b><a href='/artifacts/model_evaluation/metrics.json'>metrics.json</a></b></td>
-							<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+							<td style='padding: 8px;'>Code>❯ Store the model metrics</code></td>
 						</tr>
 					</table>
 				</blockquote>
@@ -298,7 +298,7 @@ Credit Default Prediction — A machine learning project that predicts the likel
 					</thead>
 						<tr style='border-bottom: 1px solid #eee;'>
 							<td style='padding: 8px;'><b><a href='/artifacts/model_trainer/model.joblib'>model.joblib</a></b></td>
-							<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+							<td style='padding: 8px;'>Code>❯ Store model artifacts</code></td>
 						</tr>
 					</table>
 				</blockquote>
@@ -326,11 +326,11 @@ Credit Default Prediction — A machine learning project that predicts the likel
 					</thead>
 						<tr style='border-bottom: 1px solid #eee;'>
 							<td style='padding: 8px;'><b><a href='/src/defaultMlProj.egg-info/dependency_links.txt'>dependency_links.txt</a></b></td>
-							<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+							<td style='padding: 8px;'>Code>❯ Project pypi package links</code></td>
 						</tr>
 						<tr style='border-bottom: 1px solid #eee;'>
 							<td style='padding: 8px;'><b><a href='/src/defaultMlProj.egg-info/PKG-INFO'>PKG-INFO</a></b></td>
-							<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+							<td style='padding: 8px;'>Code>❯ Project pypi package</code></td>
 						</tr>
 						<tr style='border-bottom: 1px solid #eee;'>
 							<td style='padding: 8px;'><b><a href='/src/defaultMlProj.egg-info/SOURCES.txt'>SOURCES.txt</a></b></td>
@@ -364,19 +364,19 @@ Credit Default Prediction — A machine learning project that predicts the likel
 							</thead>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/components/data_ingestion.py'>data_ingestion.py</a></b></td>
-									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+									<td style='padding: 8px;'>Code>❯ Data ingestion file</code></td>
 								</tr>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/components/data_transformation.py'>data_transformation.py</a></b></td>
-									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+									<td style='padding: 8px;'>Code>❯ Data transformation file</code></td>
 								</tr>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/components/model_evaluation.py'>model_evaluation.py</a></b></td>
-									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+									<td style='padding: 8px;'>Code>❯ Model evaluation file</code></td>
 								</tr>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/components/model_trainer.py'>model_trainer.py</a></b></td>
-									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+									<td style='padding: 8px;'>Code>❯ Model trainer file</code></td>
 								</tr>
 							</table>
 						</blockquote>
@@ -396,7 +396,7 @@ Credit Default Prediction — A machine learning project that predicts the likel
 							</thead>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/config/configuration.py'>configuration.py</a></b></td>
-									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+									<td style='padding: 8px;'>Code>❯ Config file</code></td>
 								</tr>
 							</table>
 						</blockquote>
@@ -416,7 +416,7 @@ Credit Default Prediction — A machine learning project that predicts the likel
 							</thead>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/constants/constant.py'>constant.py</a></b></td>
-									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+									<td style='padding: 8px;'>Code>❯ Project constants file</code></td>
 								</tr>
 							</table>
 						</blockquote>
@@ -436,7 +436,7 @@ Credit Default Prediction — A machine learning project that predicts the likel
 							</thead>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/entity/config_entity.py'>config_entity.py</a></b></td>
-									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+									<td style='padding: 8px;'>Code>❯ Project Config file</code></td>
 								</tr>
 							</table>
 						</blockquote>
@@ -456,23 +456,23 @@ Credit Default Prediction — A machine learning project that predicts the likel
 							</thead>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/pipeline/prediction.py'>prediction.py</a></b></td>
-									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+									<td style='padding: 8px;'>Code>❯ Model Prediction file</code></td>
 								</tr>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/pipeline/stage_data_ingestion.py'>stage_data_ingestion.py</a></b></td>
-									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+									<td style='padding: 8px;'>Code>❯ Data ingestion stage file</code></td>
 								</tr>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/pipeline/stage_data_transformation.py'>stage_data_transformation.py</a></b></td>
-									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+									<td style='padding: 8px;'>Code>❯ Data transformation stage file</code></td>
 								</tr>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/pipeline/stage_model_evaluation.py'>stage_model_evaluation.py</a></b></td>
-									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+									<td style='padding: 8px;'>Code>❯ Model evaluation stage file</code></td>
 								</tr>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/pipeline/stage_model_trainer.py'>stage_model_trainer.py</a></b></td>
-									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+									<td style='padding: 8px;'>Code>❯ Model tariner stage file</code></td>
 								</tr>
 							</table>
 						</blockquote>
@@ -492,7 +492,7 @@ Credit Default Prediction — A machine learning project that predicts the likel
 							</thead>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='/src/defaultMlProj/utils/common.py'>common.py</a></b></td>
-									<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
+									<td style='padding: 8px;'>Code>❯ Common functions project file</code></td>
 								</tr>
 							</table>
 						</blockquote>
@@ -579,14 +579,20 @@ pytest
         - KNN
         - Decision Tree
         - Random Forest
-        - Stacking Regressor (using the above models as base estimators)).
-- [ ] **`Task 4`**: Perform Model evaluation (Evaluate model using;
+        - Stacking Regressor (using the above models as base estimators)
+		).
+- [ ] **`Task 4`**: Perform Model evaluation (Evaluate model;
 		metrics = {
                 "r2_score": r2,
                 "rmse": rmse,
                 "mae": mae
             }
-			Also set up Mlflow for mdel & parameter tracking).
+			Also setup Mlflow for model & parameter tracking
+			).
+
+---
+The **best performing model** was selected based on these metrics.
+- ✅ Stacking Regressor
 
 ---
 
