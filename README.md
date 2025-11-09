@@ -2,7 +2,7 @@
 
 <!-- HEADER STYLE: CLASSIC -->
 <div align="center">
-
+Credit Risk Default Score Prediction Project
 <img src="readmeai/assets/logos/purple.svg" width="30%" style="position: relative; top: 0; right: 0;" alt="Project Logo"/>
 
 # <code>❯ REPLACE-ME</code>
@@ -52,8 +52,7 @@
 ---
 
 ## Overview
-
-
+Credit Default Prediction — A machine learning project that predicts the likelihood of customer loan default to help financial institutions minimize credit risk. Built with Python, Scikit-learn, and Pandas, the model enhances data-driven lending and supports proactive risk mitigation.
 
 ---
 
