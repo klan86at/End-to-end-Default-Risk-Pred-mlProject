@@ -3,7 +3,7 @@
 <!-- HEADER STYLE: CLASSIC -->
 <div align="center">
 	<h1> Credit Risk Default Score Prediction Project <h1>
-</div>
+
 <!-- <img src="readmeai/assets/logos/purple.svg" width="30%" style="position: relative; top: 0; right: 0;" alt="Project Logo"/> -->
 
 <!-- # <code>❯ ## 🧩 </code> -->
@@ -37,6 +37,7 @@
 
 - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
+- [Roadmap](#roadmap)
 - [Features](#features)
 - [Project Structure](#project-structure)
     - [Project Index](#project-index)
@@ -45,7 +46,6 @@
     - [Installation](#installation)
     - [Usage](#usage)
     - [Testing](#testing)
-- [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
@@ -662,7 +662,7 @@ The **best performing model** selected based on these metrics.
 
 ## License
 
- is protected under the [LICENSE](https://choosealicense.com/licenses) License. For more details, refer to the [LICENSE](https://choosealicense.com/licenses/) file.
+ is protected under the [LICENSE](https://choosealicense.com/licenses/mit/) License. For more details, refer to the [LICENSE](https://choosealicense.com/licenses/) file.
 
 ---
 
