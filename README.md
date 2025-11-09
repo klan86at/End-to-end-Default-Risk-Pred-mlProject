@@ -74,7 +74,21 @@ Outcome:
 Improved prediction accuracy of default risk, enabling proactive financial decision-making and efficient credit portfolio management.
 
 ---
+## Roadmap
 
+- [ ] **`Task 1`**: Perform Data ingestion (Ingesting data either from local-csv/database/API).
+- [ ] **`Task 2`**: Perform Data transformation (train/test split, filling missing values, encoding).
+- [ ] **`Task 3`**: Train the model (Models training).
+- [ ] **`Task 4`**: Perform Model evaluation (Evaluate model;
+		metrics = {
+                "r2_score": r2,
+                "rmse": rmse,
+                "mae": mae
+            }
+			Also setup Mlflow for model & parameter tracking
+			).
+			
+---
 ## Features
 
 <code>❯ 🗒️📌 Key Features Used
@@ -586,22 +600,6 @@ python {entrypoint}
 ```sh
 pytest
 ```
-
----
-
-## Roadmap
-
-- [ ] **`Task 1`**: Perform Data ingestion (Ingesting data either from local-csv/database/API).
-- [ ] **`Task 2`**: Perform Data transformation (train/test split, filling missing values, encoding).
-- [ ] **`Task 3`**: Train the model (Models training).
-- [ ] **`Task 4`**: Perform Model evaluation (Evaluate model;
-		metrics = {
-                "r2_score": r2,
-                "rmse": rmse,
-                "mae": mae
-            }
-			Also setup Mlflow for model & parameter tracking
-			).
 
 ---
 ### Evaluation Metrics
