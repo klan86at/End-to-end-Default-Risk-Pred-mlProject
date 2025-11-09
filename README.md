@@ -5,7 +5,7 @@
 
 <img src="readmeai/assets/logos/purple.svg" width="30%" style="position: relative; top: 0; right: 0;" alt="Project Logo"/>
 
-# <code>❯ REPLACE-ME</code>
+# <code>❯ ## 🧩 </code>
 
 <em></em>
 
@@ -52,14 +52,25 @@
 ---
 
 ## Overview
-
-
+Credit Default Prediction — A machine learning project that predicts the likelihood of customer loan default to help financial institutions minimize credit risk. Built with Python, Scikit-learn, and Pandas, the model enhances data-driven lending and supports proactive risk mitigation.
 
 ---
 
 ## Features
 
-<code>❯ REPLACE-ME</code>
+<code>❯ 🗒️📌 Key Features Used
+
+| Feature Name             | Description                                      |
+|--------------------------|--------------------------------------------------|
+| income                   | Annual income of the applicant                   |
+| loan_amount              | Total amount of the requested loan               |
+| loan_term                | Duration of the loan in months                   |
+| interest_rate            | Interest rate applied to the loan                |
+| debt_to_income_ratio     | Ratio of total debt to annual income             |
+| employment_years         | Years employed at current job                    |
+| savings_balance          | Current savings balance                          |
+| age                      | Age of the applicant                             | 
+</code>
 
 ---
 
@@ -522,22 +533,12 @@ Build  from the source and intsall dependencies:
 
 3. **Install the dependencies:**
 
-<!-- SHIELDS BADGE CURRENTLY DISABLED -->
-	<!-- [![docker][docker-shield]][docker-link] -->
-	<!-- REFERENCE LINKS -->
-	<!-- [docker-shield]: https://img.shields.io/badge/Docker-2CA5E0.svg?style={badge_style}&logo=docker&logoColor=white -->
-	<!-- [docker-link]: https://www.docker.com/ -->
 
 	**Using [docker](https://www.docker.com/):**
 
 	```sh
 	❯ docker build -t / .
 	```
-<!-- SHIELDS BADGE CURRENTLY DISABLED -->
-	<!-- [![pip][pip-shield]][pip-link] -->
-	<!-- REFERENCE LINKS -->
-	<!-- [pip-shield]: https://img.shields.io/badge/Pip-3776AB.svg?style={badge_style}&logo=pypi&logoColor=white -->
-	<!-- [pip-link]: https://pypi.org/project/pip/ -->
 
 	**Using [pip](https://pypi.org/project/pip/):**
 
@@ -571,9 +572,21 @@ pytest
 
 ## Roadmap
 
-- [X] **`Task 1`**: <strike>Implement feature one.</strike>
-- [ ] **`Task 2`**: Implement feature two.
-- [ ] **`Task 3`**: Implement feature three.
+- [ ] **`Task 1`**: Perform Data ingestion (Ingesting data either from local-csv/database/API).
+- [ ] **`Task 2`**: Perform Data transformation (train/test split, filling missing values, encoding).
+- [ ] **`Task 3`**: Train the model (Models include;
+		- Linear Regression
+        - KNN
+        - Decision Tree
+        - Random Forest
+        - Stacking Regressor (using the above models as base estimators)).
+- [ ] **`Task 4`**: Perform Model evaluation (Evaluate model using;
+		metrics = {
+                "r2_score": r2,
+                "rmse": rmse,
+                "mae": mae
+            }
+			Also set up Mlflow for mdel & parameter tracking).
 
 ---
 
