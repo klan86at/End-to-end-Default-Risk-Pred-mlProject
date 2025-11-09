@@ -2,7 +2,8 @@
 		
 <!-- HEADER STYLE: CLASSIC -->
 <div align="center">
-		## Credit Risk Default Score Prediction Project
+	<h1> Credit Risk Default Score Prediction Project <h1>
+</div>
 <!-- <img src="readmeai/assets/logos/purple.svg" width="30%" style="position: relative; top: 0; right: 0;" alt="Project Logo"/> -->
 
 <!-- # <code>❯ ## 🧩 </code> -->
@@ -53,6 +54,24 @@
 
 ## Overview
 Credit Default Prediction — A machine learning project that predicts the likelihood of customer loan default to help financial institutions minimize credit risk. Built with Python, Scikit-learn, and Pandas, the model enhances data-driven lending and supports proactive risk mitigation.
+
+Key Features:
+
+Built predictive models using supervised learning algorithms (
+		- Linear Regression
+        - KNN
+        - Decision Tree
+        - Random Forest
+        - Stacking Regressor (using the above models as base estimators)).
+
+Performed data cleaning, feature engineering, and model evaluation to ensure accuracy and reliability
+
+Generated actionable insights to support data-driven lending decisions and default mitigation strategies
+
+Tools & Technologies: Python, Scikit-learn, Pandas, NumPy, Matplotlib, Jupyter Notebook, Mlflow
+
+Outcome:
+Improved prediction accuracy of default risk, enabling proactive financial decision-making and efficient credit portfolio management.
 
 ---
 
@@ -574,13 +593,7 @@ pytest
 
 - [ ] **`Task 1`**: Perform Data ingestion (Ingesting data either from local-csv/database/API).
 - [ ] **`Task 2`**: Perform Data transformation (train/test split, filling missing values, encoding).
-- [ ] **`Task 3`**: Train the model (Models include;
-		- Linear Regression
-        - KNN
-        - Decision Tree
-        - Random Forest
-        - Stacking Regressor (using the above models as base estimators)
-		).
+- [ ] **`Task 3`**: Train the model (Models training).
 - [ ] **`Task 4`**: Perform Model evaluation (Evaluate model;
 		metrics = {
                 "r2_score": r2,
