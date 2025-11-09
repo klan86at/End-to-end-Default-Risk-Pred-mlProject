@@ -591,7 +591,15 @@ pytest
 			).
 
 ---
-The **best performing model** was selected based on these metrics.
+### Evaluation Metrics
+
+Each model was evaluated using:
+- **Mean Squared Error (MSE)**
+- **Root Mean Squared Error (RMSE)**
+- **R-squared (R²) Score**
+
+The **best performing model** selected based on these metrics.
+
 - ✅ Stacking Regressor
 
 ---
